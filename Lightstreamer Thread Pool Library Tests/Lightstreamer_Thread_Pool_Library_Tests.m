@@ -116,7 +116,8 @@
 	
 	_semaphore= [[NSCondition alloc] init];
 	[_semaphore lock];
-	
+
+	// Use Apple's OS X 10.8.2 Combo Update, which is long enough
 	NSURL *url= [NSURL URLWithString:@"http://support.apple.com/downloads/DL1581/en_US/OSXUpdCombo10.8.2.dmg"];
 	NSURLRequest *req= [NSURLRequest requestWithURL:url];
 
