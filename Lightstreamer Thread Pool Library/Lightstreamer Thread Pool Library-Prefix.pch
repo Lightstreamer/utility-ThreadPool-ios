@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'Lightstreamer Thread Pool Library' target in the 'Lightstreamer Thread Pool Library' project
+//
+
+#ifdef __OBJC__
+	#import <Foundation/Foundation.h>
+#endif
