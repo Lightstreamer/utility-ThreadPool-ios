@@ -8,14 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		8CF15FA0169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
-		8CF15FA5169D70050024547C /* Lightstreamer_Thread_Pool_Library.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8CF15FA4169D70050024547C /* Lightstreamer_Thread_Pool_Library.h */; };
-		8CF15FA7169D70050024547C /* Lightstreamer_Thread_Pool_Library.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FA6169D70050024547C /* Lightstreamer_Thread_Pool_Library.m */; };
 		8CF15FAF169D70050024547C /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15FAE169D70050024547C /* SenTestingKit.framework */; };
-		8CF15FB1169D70050024547C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15FB0169D70050024547C /* UIKit.framework */; };
 		8CF15FB2169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
 		8CF15FB5169D70050024547C /* libLightstreamer Thread Pool Library.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9C169D70050024547C /* libLightstreamer Thread Pool Library.a */; };
 		8CF15FBB169D70050024547C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8CF15FB9169D70050024547C /* InfoPlist.strings */; };
-		8CF15FBE169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.m */; };
+		8CF15FBE169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m */; };
+		8CF15FDE169D767A0024547C /* LSInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD0169D767A0024547C /* LSInvocation.m */; };
+		8CF15FDF169D767A0024547C /* LSThreadPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD2169D767A0024547C /* LSThreadPool.m */; };
+		8CF15FE0169D767A0024547C /* LSThreadPoolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */; };
+		8CF15FE1169D767A0024547C /* LSTimerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD6169D767A0024547C /* LSTimerThread.m */; };
+		8CF15FE2169D767A0024547C /* LSURLDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD9169D767A0024547C /* LSURLDispatcher.m */; };
+		8CF15FE3169D767A0024547C /* LSURLDispatcherThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */; };
+		8CF15FE4169D767A0024547C /* LSURLDispatchOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */; };
+		8CF15FEA169D83790024547C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15FE9169D83790024547C /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,7 +40,6 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
-				8CF15FA5169D70050024547C /* Lightstreamer_Thread_Pool_Library.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,15 +49,29 @@
 		8CF15F9C169D70050024547C /* libLightstreamer Thread Pool Library.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libLightstreamer Thread Pool Library.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15F9F169D70050024547C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8CF15FA3169D70050024547C /* Lightstreamer Thread Pool Library-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lightstreamer Thread Pool Library-Prefix.pch"; sourceTree = "<group>"; };
-		8CF15FA4169D70050024547C /* Lightstreamer_Thread_Pool_Library.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lightstreamer_Thread_Pool_Library.h; sourceTree = "<group>"; };
-		8CF15FA6169D70050024547C /* Lightstreamer_Thread_Pool_Library.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Lightstreamer_Thread_Pool_Library.m; sourceTree = "<group>"; };
 		8CF15FAD169D70050024547C /* Lightstreamer Thread Pool LibraryTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool LibraryTests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15FAE169D70050024547C /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		8CF15FB0169D70050024547C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		8CF15FB8169D70050024547C /* Lightstreamer Thread Pool LibraryTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Lightstreamer Thread Pool LibraryTests-Info.plist"; sourceTree = "<group>"; };
+		8CF15FB8169D70050024547C /* Lightstreamer Thread Pool Library Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Lightstreamer Thread Pool Library Tests-Info.plist"; sourceTree = "<group>"; };
 		8CF15FBA169D70050024547C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		8CF15FBC169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lightstreamer_Thread_Pool_LibraryTests.h; sourceTree = "<group>"; };
-		8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Lightstreamer_Thread_Pool_LibraryTests.m; sourceTree = "<group>"; };
+		8CF15FBC169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Lightstreamer_Thread_Pool_Library_Tests.h; sourceTree = "<group>"; };
+		8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Lightstreamer_Thread_Pool_Library_Tests.m; sourceTree = "<group>"; };
+		8CF15FCF169D767A0024547C /* LSInvocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSInvocation.h; sourceTree = "<group>"; };
+		8CF15FD0169D767A0024547C /* LSInvocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSInvocation.m; sourceTree = "<group>"; };
+		8CF15FD1169D767A0024547C /* LSThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSThreadPool.h; sourceTree = "<group>"; };
+		8CF15FD2169D767A0024547C /* LSThreadPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSThreadPool.m; sourceTree = "<group>"; };
+		8CF15FD3169D767A0024547C /* LSThreadPoolThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSThreadPoolThread.h; sourceTree = "<group>"; };
+		8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSThreadPoolThread.m; sourceTree = "<group>"; };
+		8CF15FD5169D767A0024547C /* LSTimerThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSTimerThread.h; sourceTree = "<group>"; };
+		8CF15FD6169D767A0024547C /* LSTimerThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSTimerThread.m; sourceTree = "<group>"; };
+		8CF15FD7169D767A0024547C /* LSURLDispatchDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatchDelegate.h; sourceTree = "<group>"; };
+		8CF15FD8169D767A0024547C /* LSURLDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatcher.h; sourceTree = "<group>"; };
+		8CF15FD9169D767A0024547C /* LSURLDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatcher.m; sourceTree = "<group>"; };
+		8CF15FDA169D767A0024547C /* LSURLDispatcherThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatcherThread.h; sourceTree = "<group>"; };
+		8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatcherThread.m; sourceTree = "<group>"; };
+		8CF15FDC169D767A0024547C /* LSURLDispatchOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatchOperation.h; sourceTree = "<group>"; };
+		8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatchOperation.m; sourceTree = "<group>"; };
+		8CF15FE9169D83790024547C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		8CF15FEE169DA6A60024547C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,8 +87,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CF15FEA169D83790024547C /* Security.framework in Frameworks */,
 				8CF15FAF169D70050024547C /* SenTestingKit.framework in Frameworks */,
-				8CF15FB1169D70050024547C /* UIKit.framework in Frameworks */,
 				8CF15FB2169D70050024547C /* Foundation.framework in Frameworks */,
 				8CF15FB5169D70050024547C /* libLightstreamer Thread Pool Library.a in Frameworks */,
 			);
@@ -83,9 +101,10 @@
 			isa = PBXGroup;
 			children = (
 				8CF15FA1169D70050024547C /* Lightstreamer Thread Pool Library */,
-				8CF15FB6169D70050024547C /* Lightstreamer Thread Pool LibraryTests */,
+				8CF15FB6169D70050024547C /* Lightstreamer Thread Pool Library Tests */,
 				8CF15F9E169D70050024547C /* Frameworks */,
 				8CF15F9D169D70050024547C /* Products */,
+				8CF15FEE169DA6A60024547C /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,9 +120,9 @@
 		8CF15F9E169D70050024547C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8CF15FE9169D83790024547C /* Security.framework */,
 				8CF15F9F169D70050024547C /* Foundation.framework */,
 				8CF15FAE169D70050024547C /* SenTestingKit.framework */,
-				8CF15FB0169D70050024547C /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -111,8 +130,21 @@
 		8CF15FA1169D70050024547C /* Lightstreamer Thread Pool Library */ = {
 			isa = PBXGroup;
 			children = (
-				8CF15FA4169D70050024547C /* Lightstreamer_Thread_Pool_Library.h */,
-				8CF15FA6169D70050024547C /* Lightstreamer_Thread_Pool_Library.m */,
+				8CF15FD1169D767A0024547C /* LSThreadPool.h */,
+				8CF15FD2169D767A0024547C /* LSThreadPool.m */,
+				8CF15FD3169D767A0024547C /* LSThreadPoolThread.h */,
+				8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */,
+				8CF15FCF169D767A0024547C /* LSInvocation.h */,
+				8CF15FD0169D767A0024547C /* LSInvocation.m */,
+				8CF15FD8169D767A0024547C /* LSURLDispatcher.h */,
+				8CF15FD9169D767A0024547C /* LSURLDispatcher.m */,
+				8CF15FD7169D767A0024547C /* LSURLDispatchDelegate.h */,
+				8CF15FDA169D767A0024547C /* LSURLDispatcherThread.h */,
+				8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */,
+				8CF15FDC169D767A0024547C /* LSURLDispatchOperation.h */,
+				8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */,
+				8CF15FD5169D767A0024547C /* LSTimerThread.h */,
+				8CF15FD6169D767A0024547C /* LSTimerThread.m */,
 				8CF15FA2169D70050024547C /* Supporting Files */,
 			);
 			path = "Lightstreamer Thread Pool Library";
@@ -126,20 +158,20 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		8CF15FB6169D70050024547C /* Lightstreamer Thread Pool LibraryTests */ = {
+		8CF15FB6169D70050024547C /* Lightstreamer Thread Pool Library Tests */ = {
 			isa = PBXGroup;
 			children = (
-				8CF15FBC169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.h */,
-				8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.m */,
+				8CF15FBC169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.h */,
+				8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m */,
 				8CF15FB7169D70050024547C /* Supporting Files */,
 			);
-			path = "Lightstreamer Thread Pool LibraryTests";
+			path = "Lightstreamer Thread Pool Library Tests";
 			sourceTree = "<group>";
 		};
 		8CF15FB7169D70050024547C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				8CF15FB8169D70050024547C /* Lightstreamer Thread Pool LibraryTests-Info.plist */,
+				8CF15FB8169D70050024547C /* Lightstreamer Thread Pool Library Tests-Info.plist */,
 				8CF15FB9169D70050024547C /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
@@ -243,7 +275,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CF15FA7169D70050024547C /* Lightstreamer_Thread_Pool_Library.m in Sources */,
+				8CF15FDE169D767A0024547C /* LSInvocation.m in Sources */,
+				8CF15FDF169D767A0024547C /* LSThreadPool.m in Sources */,
+				8CF15FE0169D767A0024547C /* LSThreadPoolThread.m in Sources */,
+				8CF15FE1169D767A0024547C /* LSTimerThread.m in Sources */,
+				8CF15FE2169D767A0024547C /* LSURLDispatcher.m in Sources */,
+				8CF15FE3169D767A0024547C /* LSURLDispatcherThread.m in Sources */,
+				8CF15FE4169D767A0024547C /* LSURLDispatchOperation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,7 +289,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CF15FBE169D70050024547C /* Lightstreamer_Thread_Pool_LibraryTests.m in Sources */,
+				8CF15FBE169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -355,7 +393,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				INFOPLIST_FILE = "Lightstreamer Thread Pool LibraryTests/Lightstreamer Thread Pool LibraryTests-Info.plist";
+				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -370,7 +408,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				INFOPLIST_FILE = "Lightstreamer Thread Pool LibraryTests/Lightstreamer Thread Pool LibraryTests-Info.plist";
+				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -395,6 +433,7 @@
 				8CF15FC3169D70050024547C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8CF15FC4169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool LibraryTests" */ = {
 			isa = XCConfigurationList;
@@ -403,6 +442,7 @@
 				8CF15FC6169D70050024547C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
