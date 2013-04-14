@@ -62,6 +62,7 @@
 		_loopInterval= 0.5 + ((double) (ABS(random) % 1000)) / 1000.0;
 		
 		_running= YES;
+		_working= YES;
 		
 		[self start];
 	}
@@ -104,8 +105,13 @@
 			@try {
 				[_queueMonitor lock];
 				
-				if ([_queue count] == 0)
+				if ([_queue count] == 0) {
+					_working= NO;
+
 					[_queueMonitor waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
+					
+					_working= YES;
+				}
 				
 				if ([_queue count] > 0) {
 					invocation= [[_queue objectAtIndex:0] retain];
@@ -116,12 +122,9 @@
 				[_queueMonitor unlock];
 				
 				if (invocation) {
-					_working= YES;
-
 					[invocation.target performSelector:invocation.selector withObject:invocation.argument];
 					
 					_lastActivity= [[NSDate date] timeIntervalSinceReferenceDate];
-					_working= NO;
 				}
 				
 			} @catch (NSException *e) {
