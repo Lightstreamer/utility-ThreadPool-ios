@@ -126,32 +126,35 @@
 	}
 	
 	int poolSize= 0;
+	LSThreadPoolThread *newThread= nil;
 	@synchronized (self) {
 
 		// Check if there's a free thread
 		BOOL freeThread= NO;
 		for (LSThreadPoolThread *thread in _threads) {
-			if (!thread.working)
+			if (!(thread.working)) {
 				freeThread= YES;
+				break;
+			}
 		}
 		
 		if ((!freeThread) && ([_threads count] < _size)) {
 			
 			// No free threads, create a new one
-			LSThreadPoolThread *thread= [LSThreadPoolThread threadWithPool:self
-																	  name:[NSString stringWithFormat:@"LS Pool %@ Thread %d", _name, _nextThreadId]
-																	 queue:_invocationQueue
-															  queueMonitor:_monitor];
+			newThread= [LSThreadPoolThread threadWithPool:self
+													 name:[NSString stringWithFormat:@"LS Pool %@ Thread %d", _name, _nextThreadId]
+													queue:_invocationQueue
+											 queueMonitor:_monitor];
 			
             _nextThreadId++;
 			
-			[_threads addObject:thread];
+			[_threads addObject:newThread];
 			
 			poolSize= [_threads count];
 		}
 	}
 	
-	if (poolSize)
+	if (newThread)
 		NSLog(@"LSThreadPool: created new thread for pool %@, pool size is now %d", _name, poolSize);
 
 	// Add invocation to queue
@@ -163,6 +166,10 @@
 	[_monitor signal];
 	[_monitor unlock];
 
+	// Start the thread
+	if (newThread)
+		[newThread start];
+	
 	// Reschedule thread collector
     [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(collectIdleThreads)];
     [[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
@@ -183,7 +190,7 @@
 		
 		NSMutableArray *toBeCollected= [[NSMutableArray alloc] init];
 		for (LSThreadPoolThread *thread in _threads) {
-			if ((now - thread.lastActivity) > MAX_THREAD_IDLENESS) {
+			if ((!(thread.working)) && ((now - thread.lastActivity) > MAX_THREAD_IDLENESS)) {
 				[thread dispose];
 				
 				[toBeCollected addObject:thread];
@@ -197,6 +204,10 @@
     }
 	
 	NSLog(@"LSThreadPool: collected threads for for pool %@, pool size is now %d", _name, poolSize);
+	
+	// Schedule new executions if there are still threads operating
+	if (poolSize > 0)
+		[[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
 }
 
 

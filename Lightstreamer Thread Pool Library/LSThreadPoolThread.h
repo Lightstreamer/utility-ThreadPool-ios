@@ -61,8 +61,8 @@
 #pragma mark -
 #pragma mark Properties
 
-@property (nonatomic, assign) BOOL working;
-@property (nonatomic, assign) NSTimeInterval lastActivity;
+@property (nonatomic, readonly) BOOL working;
+@property (nonatomic, readonly) NSTimeInterval lastActivity;
 
 
 @end

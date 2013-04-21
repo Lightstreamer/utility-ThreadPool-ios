@@ -63,8 +63,6 @@
 		
 		_running= YES;
 		_working= YES;
-		
-		[self start];
 	}
 	
 	return self;
