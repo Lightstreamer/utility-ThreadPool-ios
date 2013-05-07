@@ -46,6 +46,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8C66946B17394C92002ECD9C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		8CF15F9C169D70050024547C /* libLightstreamer Thread Pool Library.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libLightstreamer Thread Pool Library.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15F9F169D70050024547C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8CF15FA3169D70050024547C /* Lightstreamer Thread Pool Library-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lightstreamer Thread Pool Library-Prefix.pch"; sourceTree = "<group>"; };
@@ -105,6 +106,7 @@
 				8CF15F9E169D70050024547C /* Frameworks */,
 				8CF15F9D169D70050024547C /* Products */,
 				8CF15FEE169DA6A60024547C /* README.md */,
+				8C66946B17394C92002ECD9C /* LICENSE */,
 			);
 			sourceTree = "<group>";
 		};
