@@ -8,16 +8,17 @@ The thread pool and URL dispatch library used by Lightstreamer's iOS client libr
 What this library does
 ----------------------
 
-This code was written to solve two specific problems of iOS' SDK and runtime:
+This code was written to address a specific problem of iOS' SDK and runtime:
 
-1. NSOperationQueues are unbound with non-concurrent operations, and even with concurrent
-   operations their maxConcurrentOperationCount is not strictly enforced;
+* iOS 7 runtime has a limit of 4 concurrent NSURLConnections to the same end-point; above
+  this limit connections are going to time out.
 
-2. iOS runtime has a limit of 5 concurrent NSURLConnections to the same end-point; above
-   this limit connections are going to time-out.
-   
-For more informations on this topic, please read the article on Lightstreamer's blog on this
-specific topic:
+The library uses thread pools to keep the number of concurrent connections under control
+for each end-point, ensuring that a fifth (or subsequent) connection is enqueued by the 
+thread pool and not submitted to the system. The library offers also methods to know in 
+advance when a connection is going to succeed or time out for a given end-point.
+
+For more informations on this topic, please read the related article on Lightstreamer's blog:
 
 * http://blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html
 

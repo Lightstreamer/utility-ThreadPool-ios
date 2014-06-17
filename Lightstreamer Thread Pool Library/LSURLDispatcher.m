@@ -25,8 +25,8 @@
 #import "LSInvocation.h"
 #import "LSTimerThread.h"
 
-#define MAX_CONCURRENT_CONNECTIONS                          (5)
-#define MIN_SPARE_URL_CONNECTIONS                           (2)
+#define MAX_CONCURRENT_CONNECTIONS                          (4)
+#define MIN_SPARE_URL_CONNECTIONS                           (1)
 
 #define MAX_THREAD_IDLENESS                                (10.0)
 #define THREAD_COLLECTOR_DELAY                             (15.0)
