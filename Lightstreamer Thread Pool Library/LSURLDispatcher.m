@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 03/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -20,19 +20,37 @@
 
 #import "LSURLDispatcher.h"
 #import "LSURLDispatchOperation.h"
+#import "LSURLDispatchOperation+Internals.h"
 #import "LSURLDispatcherThread.h"
 #import "LSThreadPool.h"
 #import "LSInvocation.h"
 #import "LSTimerThread.h"
+#import "LSLog.h"
+#import "LSLog+Internals.h"
 
-#define MAX_CONCURRENT_CONNECTIONS                          (4)
-#define MIN_SPARE_URL_CONNECTIONS                           (1)
-
+#define MAX_THREADS_PER_ENDPOINT                            (4)
 #define MAX_THREAD_IDLENESS                                (10.0)
 #define THREAD_COLLECTOR_DELAY                             (15.0)
 
+#define DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT      (2)
 
-@interface LSURLDispatcher ()
+#define LS_TOO_MANY_LONG_RUNNING_REQUESTS                   (@"LSTooManyLongRunningRequests")
+
+
+#pragma mark -
+#pragma mark LSURLDispatcher extension
+
+@interface LSURLDispatcher () {
+	NSMutableDictionary *_decouplingThreadPoolsByEndPoint;
+
+	NSMutableDictionary *_freeThreadsByEndPoint;
+	NSMutableDictionary *_busyThreadsByEndPoint;
+	
+	NSMutableDictionary *_longRequestCountsByEndPoint;
+	
+	NSCondition *_waitForFreeThread;
+	int _nextThreadId;
+}
 
 
 #pragma mark -
@@ -55,7 +73,15 @@
 @end
 
 
+#pragma mark -
+#pragma mark LSURLDispatcher statics
+
 static LSURLDispatcher *__sharedDispatcher= nil;
+static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT;
+
+
+#pragma mark -
+#pragma mark LSURLDispatcher implementation
 
 @implementation LSURLDispatcher
 
@@ -83,10 +109,26 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 		if (__sharedDispatcher) {
 			[__sharedDispatcher stopThreads];
 			
-			[__sharedDispatcher release];
 			__sharedDispatcher= nil;
 		}
 	}
+}
+
+
+#pragma mark -
+#pragma mark Class properties
+
++ (NSUInteger) maxLongRunningRequestsPerEndPoint {
+	return __maxLongRunningRequestsPerEndPoint;
+}
+
++ (void) setMaxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint {
+	if (maxLongRunningRequestsPerEndPoint > MAX_THREADS_PER_ENDPOINT)
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Specified maximum number of concurrent long requests is bigger than pool size"
+									 userInfo:@{@"poolSize": [NSNumber numberWithUnsignedInteger:MAX_THREADS_PER_ENDPOINT]}];
+	
+	__maxLongRunningRequestsPerEndPoint= maxLongRunningRequestsPerEndPoint;
 }
 
 
@@ -97,6 +139,8 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 	if ((self = [super init])) {
 		
 		// Initialization
+		_decouplingThreadPoolsByEndPoint= [[NSMutableDictionary alloc] init];;
+		
 		_freeThreadsByEndPoint= [[NSMutableDictionary alloc] init];
 		_busyThreadsByEndPoint= [[NSMutableDictionary alloc] init];
 
@@ -111,84 +155,115 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 
 - (void) dealloc {
 	[LSURLDispatcher dispose];
-	
-	[_freeThreadsByEndPoint release];
-	[_busyThreadsByEndPoint release];
-
-	[_longRequestCountsByEndPoint release];
-	
-	[_waitForFreeThread release];
-	
-	[super dealloc];
 }
 
 
 #pragma mark -
 #pragma mark URL request dispatching and checking
 
-- (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse **)response error:(NSError **)error {
+- (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse * __autoreleasing *)response error:(NSError * __autoreleasing *)error delegate:(id <LSURLDispatchDelegate>)delegate {
 	NSString *endPoint= [self endPointForRequest:request];
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:nil gatherData:YES isLong:NO];
+	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:YES isLong:NO];
 
-	NSLog(@"LSURLDispatcher: starting synchronous operation %p for end-point %@", dispatchOp, endPoint);
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting synchronous operation %p for end-point %@", dispatchOp, endPoint];
 
 	// Start the operation
-	[dispatchOp start];
-	[dispatchOp waitForCompletion];
+	[dispatchOp startAndWaitForCompletion];
 
-	NSLog(@"LSURLDispatcher: synchronous operation %p for end-point %@ finished", dispatchOp, endPoint);
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"synchronous operation %p for end-point %@ finished", dispatchOp, endPoint];
 
 	if (response)
-		*response= dispatchOp.response;
+		*response= [dispatchOp.response copy];
 	
 	if (error)
-		*error= dispatchOp.error;
-	
-	[dispatchOp autorelease];
-	
+		*error= [dispatchOp.error copy];
+    
 	return dispatchOp.data;
-}
-
-- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate {
-	NSString *endPoint= [self endPointForRequest:request];
-
-	// Check if there's room for another long running request
-	int count= 0;
-	@synchronized (_longRequestCountsByEndPoint) {
-		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] intValue];
-
-		int maxLongOperations= MAX_CONCURRENT_CONNECTIONS - MIN_SPARE_URL_CONNECTIONS;
-		if (count >= maxLongOperations)
-			@throw [NSException exceptionWithName:NSInvalidArgumentException
-										   reason:@"Maximum number of concurrent long requests reached for end-point"
-										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-												   endPoint, @"endPoint",
-												   [NSNumber numberWithInt:count], @"count",
-												   nil]];
-
-		// Update long running request count
-		count++;
-
-		[_longRequestCountsByEndPoint setObject:[NSNumber numberWithInt:count] forKey:endPoint];
-	}
-	
-	NSLog(@"LSURLDispatcher: long running request count: %d", count);
-
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
-
-	NSLog(@"LSURLDispatcher: creating long operation %p for end-point %@", dispatchOp, endPoint);
-	
-	return [dispatchOp autorelease];
 }
 
 - (LSURLDispatchOperation *) dispatchShortRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate {
 	NSString *endPoint= [self endPointForRequest:request];
 	
 	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:NO];
-
-	NSLog(@"LSURLDispatcher: creating short operation %p for end-point %@", dispatchOp, endPoint);
 	
-	return [dispatchOp autorelease];
+	// Get the decoupling thread pool for this end-point
+	LSThreadPool *pool= nil;
+	@synchronized (_decouplingThreadPoolsByEndPoint) {
+		pool= [_decouplingThreadPoolsByEndPoint objectForKey:endPoint];
+		if (!pool) {
+			NSString *poolName= [NSString stringWithFormat:@"LS URL Dispatcher Decoupling Thread Pool for end-point %@", endPoint];
+			pool= [[LSThreadPool alloc] initWithName:poolName size:1];
+			
+			[_decouplingThreadPoolsByEndPoint setObject:pool forKey:endPoint];
+		}
+	}
+	
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"scheduling short operation: %p for end-point: %@", dispatchOp, endPoint];
+	
+	// Scheduling the operation with the single-thread pool:
+	// if a free connection thread for the end-point is not free
+	// it will wait until one is freed
+	[pool scheduleInvocationForBlock:^() {
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting short operation: %p for end-point: %@", dispatchOp, endPoint];
+		
+		[dispatchOp start];
+	}];
+	
+	return dispatchOp;
+}
+
+- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate {
+	return [self dispatchLongRequest:request delegate:delegate ignoreMaxLongRunningRequestsLimit:NO];
+}
+
+- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit {
+	NSString *endPoint= [self endPointForRequest:request];
+
+	// Check if there's room for another long running request
+	NSUInteger count= 0;
+	@synchronized (_longRequestCountsByEndPoint) {
+		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] unsignedIntegerValue];
+
+		if ((count >= __maxLongRunningRequestsPerEndPoint) && (!ignoreMaxLongRunningRequestsLimit))
+			@throw [NSException exceptionWithName:LS_TOO_MANY_LONG_RUNNING_REQUESTS
+										   reason:@"Maximum number of concurrent long requests reached for end-point"
+										 userInfo:@{@"endPoint": endPoint,
+													@"count": [NSNumber numberWithUnsignedInteger:count]}];
+
+		// Update long running request count
+		count++;
+
+		[_longRequestCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:count] forKey:endPoint];
+	}
+	
+	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
+	
+	// Get the decoupling thread pool for this end-point
+	LSThreadPool *pool= nil;
+	@synchronized (_decouplingThreadPoolsByEndPoint) {
+		pool= [_decouplingThreadPoolsByEndPoint objectForKey:endPoint];
+		if (!pool) {
+			NSString *poolName= [NSString stringWithFormat:@"LS URL Dispatcher Decoupling Thread Pool for end-point %@", endPoint];
+			pool= [[LSThreadPool alloc] initWithName:poolName size:1];
+			
+			[_decouplingThreadPoolsByEndPoint setObject:pool forKey:endPoint];
+		}
+	}
+	
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"scheduling long operation: %p for end-point: %@", dispatchOp, endPoint];
+	
+	// Scheduling the operation with the single-thread pool:
+	// if a free connection thread for the end-point is not free
+	// it will wait until one is freed
+	[pool scheduleInvocationForBlock:^() {
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting long operation: %p for end-point: %@", dispatchOp, endPoint];
+		
+		[dispatchOp start];
+		
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"long running request count: %lu", (unsigned long) count];
+	}];
+
+	return dispatchOp;
 }
 
 - (BOOL) isLongRequestAllowed:(NSURLRequest *)request {
@@ -216,29 +291,29 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 - (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint {
 	LSURLDispatcherThread *thread= nil;
 	
-    int poolSize= 0;
-    int activeSize= 0;
+    NSUInteger poolSize= 0;
+    NSUInteger activeSize= 0;
 	do {
 		@synchronized (_freeThreadsByEndPoint) {
 			
 			// Retrieve data structures
 			NSMutableArray *freeThreads= [_freeThreadsByEndPoint objectForKey:endPoint];
 			if (!freeThreads) {
-				freeThreads= [[[NSMutableArray alloc] init] autorelease];
+				freeThreads= [[NSMutableArray alloc] init];
 
 				[_freeThreadsByEndPoint setObject:freeThreads forKey:endPoint];
 			}
 			
 			NSMutableArray *busyThreads= [_busyThreadsByEndPoint objectForKey:endPoint];
 			if (!busyThreads) {
-				busyThreads= [[[NSMutableArray alloc] init] autorelease];
+				busyThreads= [[NSMutableArray alloc] init];
 				
 				[_busyThreadsByEndPoint setObject:busyThreads forKey:endPoint];
 			}
 			
 			// Get first free worker thread
 			if ([freeThreads count] > 0) {
-				thread= (LSURLDispatcherThread *) [[freeThreads objectAtIndex:0] retain];
+				thread= (LSURLDispatcherThread *) [freeThreads objectAtIndex:0];
 
 				[freeThreads removeObjectAtIndex:0];
 			}
@@ -246,7 +321,7 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 			if (!thread) {
 				
 				// Check if we have to wait or create a new one
-				if ([busyThreads count] < MAX_CONCURRENT_CONNECTIONS) {
+				if ([busyThreads count] < MAX(MAX_THREADS_PER_ENDPOINT, __maxLongRunningRequestsPerEndPoint)) {
 					thread= [[LSURLDispatcherThread alloc] init];
 					thread.name= [NSString stringWithFormat:@"LS URL Dispatcher Thread %d", _nextThreadId];
 					
@@ -257,7 +332,7 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 			}
 
 			if (thread) {
-				[busyThreads addObject:[thread autorelease]];
+				[busyThreads addObject:thread];
 			
 				activeSize= [busyThreads count];
 				poolSize= activeSize + [freeThreads count];
@@ -265,7 +340,7 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 			}
 		}
 		
-		NSLog(@"LSURLDispatcher: waiting for a free thread");
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"waiting for a free thread"];
 
 		// If we've got here, we have to wait for a free thread and retry
 		[_waitForFreeThread lock];
@@ -274,27 +349,27 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 
 	} while (YES);
 	
-    NSLog(@"LSURLDispatcher: preempted thread %p for end-point %@, pool size is now %d (%d active)", thread, endPoint, poolSize, activeSize);
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"preempted thread %p for end-point: %@, pool size is now: %lu (%lu active)", thread, endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
 
 	return thread;
 }
 
 - (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint {
-    int poolSize= 0;
-    int activeSize= 0;
+    NSUInteger poolSize= 0;
+    NSUInteger activeSize= 0;
 	@synchronized (_freeThreadsByEndPoint) {
 
 		// Retrieve data structures
 		NSMutableArray *freeThreads= [_freeThreadsByEndPoint objectForKey:endPoint];
 		if (!freeThreads) {
-			freeThreads= [[[NSMutableArray alloc] init] autorelease];
+			freeThreads= [[NSMutableArray alloc] init];
 			
 			[_freeThreadsByEndPoint setObject:freeThreads forKey:endPoint];
 		}
 		
 		NSMutableArray *busyThreads= [_busyThreadsByEndPoint objectForKey:endPoint];
 		if (!busyThreads) {
-			busyThreads= [[[NSMutableArray alloc] init] autorelease];
+			busyThreads= [[NSMutableArray alloc] init];
 			
 			[_busyThreadsByEndPoint setObject:busyThreads forKey:endPoint];
 		}
@@ -318,28 +393,28 @@ static LSURLDispatcher *__sharedDispatcher= nil;
     [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(collectIdleThreads)];
     [[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
     
-    NSLog(@"LSURLDispatcher: released thread %p for end-point %@, pool size is now %d (%d active)", thread, endPoint, poolSize, activeSize);
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"released thread %p for end-point: %@, pool size is now: %lu (%lu active)", thread, endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
 }
 
 - (void) operationDidFinish:(LSURLDispatchOperation *)dispatchOp {
 	if (dispatchOp.isLong) {
 		
 		// Update long running request count
-		int count= 0;
+		NSUInteger count= 0;
 		@synchronized (_longRequestCountsByEndPoint) {
-			count= [[_longRequestCountsByEndPoint objectForKey:dispatchOp.endPoint] intValue];
+			count= [[_longRequestCountsByEndPoint objectForKey:dispatchOp.endPoint] unsignedIntegerValue];
 			count--;
 			
-			[_longRequestCountsByEndPoint setObject:[NSNumber numberWithInt:count] forKey:dispatchOp.endPoint];
+			[_longRequestCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:count] forKey:dispatchOp.endPoint];
 		}
 		
-		NSLog(@"LSURLDispatcher: long running request count: %d", count);
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"long running request count: %lu", (unsigned long) count];
 	}
 	
-	if (dispatchOp.thread) {
+	if ([dispatchOp thread]) {
 		
 		// Release connection thread to thread pool
-		[self releaseThread:dispatchOp.thread forEndPoint:dispatchOp.endPoint];
+		[self releaseThread:[dispatchOp thread] forEndPoint:dispatchOp.endPoint];
 	}
 }
 
@@ -364,11 +439,10 @@ static LSURLDispatcher *__sharedDispatcher= nil;
             }
         
             [freeThreads removeObjectsInArray:toBeCollected];
-            [toBeCollected release];
         }
     }
 
-	NSLog(@"LSURLDispatcher: collected threads for all end-points");
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"collected threads for all end-points"];
 }
 
 - (void) stopThreads {
@@ -388,7 +462,7 @@ static LSURLDispatcher *__sharedDispatcher= nil;
         }
 	}
     
-    NSLog(@"LSURLDispatcher: stopped all threads, pools are now all empty");
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"stopped all threads, pools are now empty"];
 }
 
 
@@ -396,15 +470,13 @@ static LSURLDispatcher *__sharedDispatcher= nil;
 #pragma mark Internal methods
 
 - (BOOL) isLongRequestAllowedToEndPoint:(NSString *)endPoint {
-	int count= 0;
+	NSUInteger count= 0;
     
 	@synchronized (_longRequestCountsByEndPoint) {
-		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] intValue];
+		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] unsignedIntegerValue];
 	}
 	
-	// Let's leave 2 spare connections for short requests
-	int maxLongOperations= MAX_CONCURRENT_CONNECTIONS - MIN_SPARE_URL_CONNECTIONS;
-	return (count < maxLongOperations);
+	return (count < __maxLongRunningRequestsPerEndPoint);
 }
 
 - (NSString *) endPointForURL:(NSURL *)url {

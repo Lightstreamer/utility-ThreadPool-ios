@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 18/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -21,41 +21,92 @@
 #import "LSInvocation.h"
 
 
+
+#pragma mark -
+#pragma mark LSInvocation extension
+
+@interface LSInvocation () {
+	id _target;
+	SEL _selector;
+	id _argument;
+	NSTimeInterval _delay;
+	
+	LSInvocationBlock _block;
+	
+	NSCondition *_completionMonitor;
+	BOOL _completed;
+}
+
+
+@end
+
+
+#pragma mark -
+#pragma mark LSInvocation implementation
+
 @implementation LSInvocation
 
 
 #pragma mark -
 #pragma mark Initialization
 
-+ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector {
-	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil];
++ (LSInvocation *) invocationWithBlock:(LSInvocationBlock)block {
+	LSInvocation *invocation= [[LSInvocation alloc] initWithBlock:block];
 	
-	return [invocation autorelease];
+	return invocation;
+}
+
++ (LSInvocation *) invocationWithTarget:(id)target {
+	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:nil argument:nil delay:0.0];
+	
+	return invocation;
+}
+
++ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector {
+	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:0.0];
+	
+	return invocation;
+}
+
++ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector delay:(NSTimeInterval)delay {
+	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:delay];
+	
+	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument {
-	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument];
+	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:0.0];
 	
-	return [invocation autorelease];
+	return invocation;
 }
 
-- (id) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument {
++ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
+	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:delay];
+	
+	return invocation;
+}
+
+- (id) initWithBlock:(LSInvocationBlock)block {
 	if ((self = [super init])) {
 		
 		// Initialization
-		_target= [target retain];
-		_selector= selector;
-		_argument= [argument retain];
+		_block= [block copy];
 	}
 	
 	return self;
 }
 
-- (void) dealloc {
-	[_target release];
-	[_argument release];
+- (id) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
+	if ((self = [super init])) {
+		
+		// Initialization
+		_target= target;
+		_selector= selector;
+		_argument= argument;
+		_delay= delay;
+	}
 	
-	[super dealloc];
+	return self;
 }
 
 
@@ -79,10 +130,8 @@
 	[_completionMonitor wait];
 	[_completionMonitor unlock];
 	
-	if (toBeReleased) {
-		[_completionMonitor release];
+	if (toBeReleased)
 		_completionMonitor= nil;
-	}
 }
 
 - (void) completed {
@@ -97,9 +146,11 @@
 	}
 }
 
+
 #pragma mark -
 #pragma mark Properties
 
+@synthesize block= _block;
 @synthesize target= _target;
 @synthesize selector= _selector;
 @synthesize argument= _argument;

@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 03/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -25,48 +25,58 @@
 @class LSURLDispatcherThread;
 @class LSInvocation;
 
-@interface LSURLDispatchOperation : NSObject {
-	NSURLRequest *_request;
-	NSString *_endPoint;
-	id <LSURLDispatchDelegate> _delegate;
-	BOOL _gathedData;
-	BOOL _isLong;
-
-	LSURLDispatcherThread *_thread;
-	NSURLConnection *_connection;
-	NSCondition *_waitForCompletion;
-	
-	NSURLResponse *_response;
-	NSError *_error;
-	NSMutableData *_data;
-}
+/**
+ @brief LSURLDispatchOperation describes an ongoing URL request operation.
+ <br/> Provides a service to cancel the request.
+ */
+@interface LSURLDispatchOperation : NSObject
 
 
 #pragma mark -
-#pragma mark Initialization
+#pragma mark Request canceling
 
-- (id) initWithURLRequest:(NSURLRequest *)request endPoint:(NSString *)endPoint delegate:(id <LSURLDispatchDelegate>)delegate gatherData:(BOOL)gatherData isLong:(BOOL)isLong;
-
-
-#pragma mark -
-#pragma mark Execution
-
-- (void) start;
-- (void) waitForCompletion;
+/**
+ @brief Cancels the URL request operation, freeing the connection.
+ <br/> The call is executed on a background thread. So it returns immeditaly, byt the operation may keep going for a while 
+ before it is actually cancelled.
+ */
 - (void) cancel;
 
 
 #pragma mark -
 #pragma mark Properties
 
+/**
+ @brief The original URL request for this operation.
+ */
 @property (nonatomic, readonly) NSURLRequest *request;
+
+/**
+ @brief The URL request end-point, expressed as "host:port".
+ */
 @property (nonatomic, readonly) NSString *endPoint;
+
+/**
+ @brief If the URL request operation has been started as a long running request.
+ */
 @property (nonatomic, readonly) BOOL isLong;
 
-@property (nonatomic, readonly) LSURLDispatcherThread *thread;
-
+/**
+ @brief The HTTP URL response as returned by the end-point.
+ <br/> Initially nil, it is filled as the URL request operation progresses.
+ */
 @property (nonatomic, readonly) NSURLResponse *response;
+
+/**
+ @brief An eventual connection error, if the URL request operation cannot be completed.
+ */
 @property (nonatomic, readonly) NSError *error;
+
+/**
+ @brief When using synchronous requests, contains the body of the HTTP response.
+ <br/> Initially nil, it is filled as the URL request operation progresses. When using short or long requests,
+ this value remains nil (i.e. collecting the data is up to the delegate).
+ */
 @property (nonatomic, readonly) NSData *data;
 
 

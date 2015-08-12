@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 17/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -16,47 +16,98 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-// 
+//
 
 #import <Foundation/Foundation.h>
 
+#import "LSInvocation.h"
 
-@class LSInvocation;
 
-@interface LSThreadPool : NSObject {
-	NSString *_name;
-	int _size;
-
-	NSMutableArray *_threads;
-
-	NSMutableArray *_invocationQueue;
-	NSCondition *_monitor;
-	
-    int _nextThreadId;
-	BOOL _disposed;
-}
+/**
+ @brief LSThreadPool provides a fixed-size thread pool for use in concurrent operations/algorithms.
+ <br/> Threads are created on-demand and recycled up to 10 seconds after a call has been scheduled.
+ Every 15 seconds a collector passes and disposes of threads on idle since more than 10 seconds.
+ */
+@interface LSThreadPool : NSObject
 
 
 #pragma mark -
 #pragma mark Initialization
 
-+ (LSThreadPool *) poolWithName:(NSString *)name size:(int)poolSize;
-- (id) initWithName:(NSString *)name size:(int)poolSize;
+/**
+ @brief Creates an LSThreadPool with the specified name and size.
+ @param name The name of the thread pool. Used during logging to diagnose problems.
+ @param poolSize The maximum size of the thread pool. Threads are created on-demand,
+ hence in any moment there may be up to <code>poolSize</code> threads.
+ @return The created thread pool.
+ */
++ (LSThreadPool *) poolWithName:(NSString *)name size:(NSUInteger)poolSize;
 
+/**
+ @brief Initializes an LSThreadPool with the specified name and size.
+ @param name The name of the thread pool, used when logging to diagnose problems.
+ @param poolSize The maximum size of the thread pool. Threads are created on-demand,
+ hence in any moment there may be up to <code>poolSize</code> threads.
+ */
+- (id) initWithName:(NSString *)name size:(NSUInteger)poolSize;
+
+/**
+ @brief Disposes of any active thread and makes the thread pool no more usable.
+ <br/> After a call to <code>dispose</code> no more scheduled calls will be accepted.
+ */
 - (void) dispose;
 
 
 #pragma mark -
 #pragma mark Invocation scheduling
 
+/**
+ @brief Schedules a call to the specified block.
+ <br/> If the current size of the thread pool is less than <code>poolSize</code>, a new thread is
+ created and the call is executed immediately. Otherwise the call is stored in the queue and will
+ be executed on a first-in-first-served basis.
+ @param block The block to be executed.
+ @return A descriptor of the scheduled call.
+ <br/> May be used to wait for its completion.
+ @throws NSException If the thread pool has already been disposed of.
+ */
+- (LSInvocation *) scheduleInvocationForBlock:(LSInvocationBlock)block;
+
+/**
+ @brief Schedules a call to the specified target and selector.
+ <br/> If the current size of the thread pool is less than <code>poolSize</code>, a new thread is
+ created and the call is executed immediately. Otherwise the call is stored in the queue and will
+ be executed on a first-in-first-served basis.
+ @param target The target of the call.
+ @param selector The selector of the target to be called.
+ @return A descriptor of the scheduled call.
+ <br/> May be used to wait for its completion.
+ @throws NSException If the thread pool has already been disposed of.
+ */
 - (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector;
+
+/**
+ @brief Schedules a call to the specified target and selector with the specified argument.
+ <br/> If the current size of the thread pool is less than <code>poolSize</code>, a new thread is
+ created and the call is executed immediately. Otherwise the call is stored in the queue and will
+ be executed on a first-in-first-served basis.
+ @param target The target of the call.
+ @param selector The selector of the target to be called.
+ @param object The argument of the selector to be called.
+ @return A descriptor of the scheduled call.
+ <br/> May be used to wait for its completion.
+ @throws NSException If the thread pool has already been disposed of.
+ */
 - (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector withObject:(id)object;
 
 
 #pragma mark -
 #pragma mark Properties
 
-@property (nonatomic, readonly) int queueSize;
+/**
+ @brief The current size of the scheduled calls queue.
+ */
+@property (nonatomic, readonly) NSUInteger queueSize;
 
 
 @end

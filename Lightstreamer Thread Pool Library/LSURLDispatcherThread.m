@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 10/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -20,9 +20,30 @@
 
 #import "LSURLDispatcherThread.h"
 #import "LSURLDispatcher.h"
+#import "LSLog.h"
+#import "LSLog+Internals.h"
 
+
+#pragma mark -
+#pragma mark LSURLDispatcherThread extension
+
+@interface LSURLDispatcherThread () {
+	NSTimeInterval _loopInterval;
+	
+	NSTimeInterval _lastActivity;
+	
+	BOOL _running;
+}
+
+
+@end
+
+
+#pragma mark -
+#pragma mark LSURLDispatcherThread implementation
 
 @implementation LSURLDispatcherThread
+
 
 #pragma mark -
 #pragma mark Initialization
@@ -47,30 +68,25 @@
 #pragma mark Thread run loop
 
 - (void) main {
-	NSAutoreleasePool *pool= [[NSAutoreleasePool alloc] init];
-	
-	NSRunLoop *runLoop= [NSRunLoop currentRunLoop];
-	
-	NSLog(@"LSURLDispatcherThread: thread %p started", self);
-	
-	do {
-		NSAutoreleasePool *innerPool= [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
+        NSRunLoop *runLoop= [NSRunLoop currentRunLoop];
+        
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"thread %p started", self];
 		
-		@try {
-			[runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
-			
-		} @catch (NSException *e) {
-			NSLog(@"LSURLDispatcherThread: exception caught while running thread %p run loop: %@", self, e);
-			
-		} @finally {
-			[innerPool drain];
-		}
-		
-	} while (_running);
-	
-	NSLog(@"LSURLDispatcherThread: thread %p stopped", self);
-	
-	[pool drain];
+        do {
+            @autoreleasepool {
+                @try {
+                    [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
+                    
+                } @catch (NSException *e) {
+					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"exception caught while running thread %p run loop: %@", self, e];
+                }
+            }
+            
+        } while (_running);
+        
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"thread %p stopped", self];
+    }
 }
 
 

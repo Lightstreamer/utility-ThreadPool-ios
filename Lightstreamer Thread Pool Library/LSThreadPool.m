@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 17/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -21,13 +21,38 @@
 #import "LSThreadPool.h"
 #import "LSThreadPoolThread.h"
 #import "LSInvocation.h"
+#import "LSInvocation+Internals.h"
 #import "LSTimerThread.h"
+#import "LSLog.h"
+#import "LSLog+Internals.h"
 
 #define MAX_THREAD_IDLENESS                                (10.0)
 #define THREAD_COLLECTOR_DELAY                             (15.0)
 
+#define LS_THREAD_POOL_DISPOSED_OF                         (@"LSThreadPoolDisposedOf")
 
-@interface LSThreadPool ()
+
+#pragma mark -
+#pragma mark LSThreadPool extension
+
+@interface LSThreadPool () {
+	NSString *_name;
+	NSUInteger _size;
+	
+	NSMutableArray *_threads;
+	
+	NSMutableArray *_invocationQueue;
+	NSCondition *_monitor;
+	
+	int _nextThreadId;
+	BOOL _disposed;
+}
+
+
+#pragma mark -
+#pragma mark Internal
+
+- (void) scheduleInvocation:(LSInvocation *)invocation;
 
 
 #pragma mark -
@@ -39,23 +64,26 @@
 @end
 
 
+#pragma mark -
+#pragma mark LSThreadPool implementation
+
 @implementation LSThreadPool
 
 
 #pragma mark -
 #pragma mark Initialization
 
-+ (LSThreadPool *) poolWithName:(NSString *)name size:(int)poolSize {
++ (LSThreadPool *) poolWithName:(NSString *)name size:(NSUInteger)poolSize {
 	LSThreadPool *pool= [[LSThreadPool alloc] initWithName:name size:poolSize];
 	
-	return [pool autorelease];
+	return pool;
 }
 
-- (id) initWithName:(NSString *)name size:(int)poolSize {
+- (id) initWithName:(NSString *)name size:(NSUInteger)poolSize {
 	if ((self = [super init])) {
 		
 		// Initialization
-		_name= [name retain];
+		_name= name;
 		_size= poolSize;
 		
 		_threads= [[NSMutableArray alloc] initWithCapacity:_size];
@@ -86,33 +114,44 @@
 
 - (void) dealloc {
 	[self dispose];
-	
-	[_name release];
-	
-	[_threads release];
-	
-	[_invocationQueue release];
-	[_monitor release];
-	
-	[super dealloc];
 }
 
 
 #pragma mark -
 #pragma mark Invocation scheduling
 
+- (LSInvocation *) scheduleInvocationForBlock:(LSInvocationBlock)block {
+	LSInvocation *invocation= [LSInvocation invocationWithBlock:block];
+	
+	[self scheduleInvocation:invocation];
+	return invocation;
+}
+
 - (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector {
-	return [self scheduleInvocationForTarget:target selector:selector withObject:nil];
+	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector];
+	
+	[self scheduleInvocation:invocation];
+	return invocation;
 }
 
 - (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector withObject:(id)object {
-	if (_disposed) {
-		NSLog(@"LSThreadPool: can't schedule invocation: thread pool has already been disposed");
-		
-		return nil;
-	}
+	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:object];
 	
-	int poolSize= 0;
+	[self scheduleInvocation:invocation];
+	return invocation;
+}
+
+
+#pragma mark -
+#pragma mark Internals
+
+- (void) scheduleInvocation:(LSInvocation *)invocation {
+	if (_disposed)
+		@throw [NSException exceptionWithName:LS_THREAD_POOL_DISPOSED_OF
+									   reason:@"Can't schedule invocation: thread pool has already been disposed"
+									 userInfo:@{@"threadPoolName": _name}];
+	
+	NSUInteger poolSize= 0;
 	LSThreadPoolThread *newThread= nil;
 	@synchronized (self) {
 
@@ -128,10 +167,10 @@
 		if ((!freeThread) && ([_threads count] < _size)) {
 			
 			// No free threads, create a new one
-			newThread= [LSThreadPoolThread threadWithPool:self
-													 name:[NSString stringWithFormat:@"LS Pool %@ Thread %d", _name, _nextThreadId]
-													queue:_invocationQueue
-											 queueMonitor:_monitor];
+			newThread= [[LSThreadPoolThread alloc] initWithPool:self
+														   name:[NSString stringWithFormat:@"LS Pool %@ Thread %d", _name, _nextThreadId]
+														  queue:_invocationQueue
+												   queueMonitor:_monitor];
 			
             _nextThreadId++;
 			
@@ -142,26 +181,23 @@
 	}
 	
 	if (newThread)
-		NSLog(@"LSThreadPool: created new thread for pool %@, pool size is now %d", _name, poolSize);
+		[LSLog sourceType:LOG_SRC_THREAD_POOL source:self log:@"created new thread for pool %@, pool size is now: %lu", _name, (unsigned long) poolSize];
 
 	// Add invocation to queue
 	[_monitor lock];
 	
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:object];
 	[_invocationQueue addObject:invocation];
 	
 	[_monitor signal];
 	[_monitor unlock];
-
+	
 	// Start the thread
 	if (newThread)
 		[newThread start];
-	
+
 	// Reschedule thread collector
     [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(collectIdleThreads)];
     [[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
-	
-	return invocation;
 }
 
 
@@ -171,7 +207,7 @@
 - (void) collectIdleThreads {
 
 	// Collect idle threads
-	int poolSize= 0;
+	NSUInteger poolSize= 0;
 	@synchronized (self) {
         NSTimeInterval now= [[NSDate date] timeIntervalSinceReferenceDate];
 		
@@ -185,12 +221,11 @@
 		}
 		
 		[_threads removeObjectsInArray:toBeCollected];
-		[toBeCollected release];
 		
 		poolSize= [_threads count];
     }
 	
-	NSLog(@"LSThreadPool: collected threads for for pool %@, pool size is now %d", _name, poolSize);
+	[LSLog sourceType:LOG_SRC_THREAD_POOL source:self log:@"collected threads for for pool %@, pool size is now: %lu", _name, (unsigned long) poolSize];
 	
 	// Schedule new executions if there are still threads operating
 	if (poolSize > 0)
@@ -203,7 +238,7 @@
 
 @dynamic queueSize;
 
-- (int) queueSize {
+- (NSUInteger) queueSize {
 	@try {
 		[_monitor lock];
 		

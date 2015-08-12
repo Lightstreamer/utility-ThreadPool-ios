@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 18/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -23,23 +23,16 @@
 
 @class LSThreadPool;
 
-@interface LSThreadPoolThread : NSThread {
-	LSThreadPool *_pool;
-	NSString *_name;
-	NSMutableArray *_queue;
-	NSCondition *_queueMonitor;
-	
-	NSTimeInterval _loopInterval;
-    NSTimeInterval _lastActivity;
-	BOOL _running;
-	BOOL _working;
-}
+/**
+ @brief A thread of an LSThreadPool. <b>This class should not be used directly</b>.
+ @see LSThreadPool.
+ */
+@interface LSThreadPoolThread : NSThread
 
 
 #pragma mark -
 #pragma mark Initialization
 
-+ (LSThreadPoolThread *) threadWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor;
 - (id) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor;
 
 - (void) dispose;

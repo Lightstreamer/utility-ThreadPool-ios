@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 28/08/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -20,28 +20,79 @@
 
 #import <Foundation/Foundation.h>
 
-@interface LSTimerThread : NSObject {
-	NSThread *_thread;
-	BOOL _running;
-}
+
+/**
+ @brief LSTimerThread is a singleton object that provides services to perform delayed calls of methods of any target/selector, 
+ without requiring a run loop on the main thread.
+ <br/> A specific thread is started and shared, with an appropriate run loop, to make the delayed calls.
+ */
+@interface LSTimerThread : NSObject
 
 
 #pragma mark -
 #pragma mark Singleton management
 
+/**
+ @brief Accessor for the LSTimerThread singleton.
+ <br/> At the first call the singleton is initialized.
+ @return The LSTimerThread singleton.
+ */
 + (LSTimerThread *) sharedTimer;
+
+/**
+ @brief Disposes of the current LSTimerThread singleton.
+ <br/> If <code>sharedTimer</code> is called again after <code>dispose</code>, a new singleton is initialized.
+ */
 + (void) dispose;
 
 
 #pragma mark -
 #pragma mark Setting and removing timers
 
-- (void) performSelector:(SEL)aSelector onTarget:(id)aTarget withObject:(id)anArgument afterDelay:(NSTimeInterval)delay;
-- (void) performSelector:(SEL)aSelector onTarget:(id)aTarget afterDelay:(NSTimeInterval)delay;
+/**
+ @brief Schedules a delayed call of a target and selector with an argument.
+ <br/> The selector (method signature) must have exactly one argument.
+ @param selector Selector (method signature) to be called.
+ @param target Target (object) to be called.
+ @param argument Single argument (parameter) of the selector. A <code>nil</code> is accepted.
+ @param delay Delay of the call, expressed as seconds.
+ */
+- (void) performSelector:(SEL)selector onTarget:(id)target withObject:(id)argument afterDelay:(NSTimeInterval)delay;
 
-- (void) cancelPreviousPerformRequestsWithTarget:(id)aTarget selector:(SEL)aSelector object:(id)anArgument;
-- (void) cancelPreviousPerformRequestsWithTarget:(id)aTarget selector:(SEL)aSelector;
-- (void) cancelPreviousPerformRequestsWithTarget:(id)aTarget;
+/**
+ @brief Schedules a delayed call of a target and selector with an argument.
+ <br/> The selector (method signature) must have no arguments.
+ @param selector Selector (method signature) to be called.
+ @param target Target (object) to be called.
+ @param delay Delay of the call, expressed as seconds.
+ */
+- (void) performSelector:(SEL)selector onTarget:(id)target afterDelay:(NSTimeInterval)delay;
+
+/**
+ @brief Cancels a previously scheduled call to the specified target and selector and with the specified argument.
+ <br/> The selector (method signature) must have exactly one argument. If the argument differs (it is checked for
+ equality with <code>isEqual:</code>) the scheduled call will not be canceled.
+ @param target Target (object) previously scheduled for a call.
+ @param selector Selector (method signature) previously scheduled for a call.
+ @param argument Single argument (parameter) of the selector previously scheduled for a call. A <code>nil</code> is accepted.
+ */
+- (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector object:(id)argument;
+
+/**
+ @brief Cancels a previously scheduled call to the specified target and selector with no arguments.
+ <br/> The selector (method signature) must have no arguments. The scheduled call must not have specified
+ an argument, or it will not be canceled.
+ @param target Target (object) previously scheduled for a call.
+ @param selector Selector (method signature) previously scheduled for a call.
+ */
+- (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector;
+
+/**
+ @brief Cancels any previously scheduled call to the specified target.
+ <br/> Any scheduled call for the target, whatever the selector or the argument specified, will be canceled.
+ @param target Target (object) previously scheduled for a call.
+ */
+- (void) cancelPreviousPerformRequestsWithTarget:(id)target;
 
 
 @end

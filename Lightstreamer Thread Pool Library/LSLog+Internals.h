@@ -1,9 +1,9 @@
 //
-//  Lightstreamer_Thread_Pool_Library_Tests.h
-//  Lightstreamer Thread Pool Library Tests
+//  LSLog+Internals.h
+//  Lightstreamer Thread Pool Library
 //
-//  Created by Gianluca Bertani on 09/01/13.
-//  Copyright 2013 Weswit Srl
+//  Created by Gianluca Bertani on 12/08/15.
+//  Copyright (c) 2015 Weswit srl. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -18,22 +18,18 @@
 //  limitations under the License.
 //
 
-#import <SenTestingKit/SenTestingKit.h>
-#import "LSURLDispatchDelegate.h"
+
+#pragma mark -
+#pragma mark LSLog Internals category
+
+@interface LSLog (Internals)
 
 
-@class LSThreadPool;
-@class LSURLDispatcher;
+#pragma mark -
+#pragma mark Logging (for internal use only)
 
-@interface Lightstreamer_Thread_Pool_Library_Tests : SenTestCase <LSURLDispatchDelegate> {
-	LSThreadPool *_threadPool;
-	LSURLDispatcher *_urlDispatcher;
-	
-	int _count;
-	NSCondition *_semaphore;
-	
-	NSMutableDictionary *_downloads;
-}
++ (void) sourceType:(int)sourceType source:(id)source log:(NSString *)format, ...;
++ (void) log:(NSString *)format, ...;
 
 
 @end

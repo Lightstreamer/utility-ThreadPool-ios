@@ -1,9 +1,9 @@
 //
-//  LSURLDispatcherThread.h
+//  LSLogDelegate.h
 //  Lightstreamer Thread Pool Library
 //
-//  Created by Gianluca Bertani on 10/09/12.
-//  Copyright 2013-2015 Weswit Srl
+//  Created by Gianluca Bertani on 04/02/15.
+//  Copyright 2015 Weswit srl. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -22,22 +22,23 @@
 
 
 /**
- @brief A thread of a connection of the LSURLDispatcher. <b>This class should not be used directly</b>.
- @see LSURLDispatcher.
+ @brief The LSLogDelegate protocol can be used to redirect the simple logging
+ system to a different destination, such as a file or an application-wide
+ logging system.
  */
-@interface LSURLDispatcherThread : NSThread
+@protocol LSLogDelegate <NSObject>
 
 
 #pragma mark -
-#pragma mark Execution control
+#pragma mark Logging
 
-- (void) stopThread;
-
-
-#pragma mark -
-#pragma mark Properties
-
-@property (nonatomic, assign) NSTimeInterval lastActivity;
+/**
+ @brief Called when a log line has to be appended. The line contains preformatted content,
+ such as the current thread pointer, the logging source name and its pointer, and
+ the actual log message. The line does not contain any line-endings.
+ @param logLine The log line to be appended.
+ */
+- (void) appendLogLine:(NSString *)logLine;
 
 
 @end

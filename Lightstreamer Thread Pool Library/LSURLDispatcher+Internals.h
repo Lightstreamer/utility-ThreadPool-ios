@@ -1,9 +1,9 @@
 //
-//  LSURLDispatcherThread.h
+//  LSURLDispatcher+Internals.h
 //  Lightstreamer Thread Pool Library
 //
-//  Created by Gianluca Bertani on 10/09/12.
-//  Copyright 2013-2015 Weswit Srl
+//  Created by Gianluca Bertani on 11/08/15.
+//  Copyright (c) 2015 Weswit srl. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -18,26 +18,22 @@
 //  limitations under the License.
 //
 
-#import <Foundation/Foundation.h>
-
-
-/**
- @brief A thread of a connection of the LSURLDispatcher. <b>This class should not be used directly</b>.
- @see LSURLDispatcher.
- */
-@interface LSURLDispatcherThread : NSThread
+#import "LSURLDispatcher.h"
 
 
 #pragma mark -
-#pragma mark Execution control
+#pragma mark LSURLDispatcher Internals category
 
-- (void) stopThread;
+@interface LSURLDispatcher (Internals)
 
 
 #pragma mark -
-#pragma mark Properties
+#pragma mark Thread pool management and notifications (for internal use only)
 
-@property (nonatomic, assign) NSTimeInterval lastActivity;
+- (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint;
+- (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint;
+
+- (void) operationDidFinish:(LSURLDispatchOperation *)dispatchOp;
 
 
 @end

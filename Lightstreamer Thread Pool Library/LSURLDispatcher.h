@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 03/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -25,42 +25,143 @@
 @class LSURLDispatcherThread;
 @protocol LSURLDispatchDelegate;
 
-@interface LSURLDispatcher : NSObject {
-	NSMutableDictionary *_freeThreadsByEndPoint;
-	NSMutableDictionary *_busyThreadsByEndPoint;
-    
-	NSMutableDictionary *_longRequestCountsByEndPoint;
-	
-	NSCondition *_waitForFreeThread;
-    int _nextThreadId;
-}
+/**
+ @brief LSURLDispatcher is a singleton object providing URL connection services on fixed connection pools divided by end-point.
+ <br/> By using fixed pools, it guarantees that the connection limit imposed by the system is never exceeded. If the connection pool 
+ for a certain end-point is exhausted, it may either put the calling thread to wait or refuse the request by throwing an exception,
+ depending on the type of connection requested.
+ <br/> Connection requests may be of 1 of 3 different types: <ul>
+ <li> <b>synchronous request</b>: keeps the calling thread suspended and return only with a complete NSData or NSError;
+ <li> <b>short request</b>: detaches from the calling thread and works asynchronously with a specified delegate;
+ <li> <b>long request</b>: detaches from the calling thread and works asynchronously, like short connections, but their number
+ is further monitored to avoid a connection pool congestion.
+ </ul>
+ <br/> Given these 3 types of requests, the expected usage pattern is the following: <ul>
+ <li> synchronous and short requests should be used for short request-reply roundtrips that are expected to last for a few seconds.
+ <br/> Their concurrency is limited by the connection pool size (i.e. 4 by factory setting), and if a fifth connection is requested the
+ calling thread is put to wait until a connection is freed;
+ <li> long requests should be used only for long running connections, such as data streaming, audio streaming, VoIPs, videos, etc.
+ <br/> Their concurrency is further limited by configuration (2 by default, so to always keep 2 spare connections for short and synchronous
+ requests), and the LSURLDispatcher can tell if another long running connection can be requested or not; if it can't and it is
+ requested anyway, an exception is thrown.
+ </ul>
+ <br/> Connection threads are created on-demand and recycled up to 10 seconds after a thread has been freed. Every 15 seconds
+ a collector passes and disposes of threads remained on idle since more than 10 seconds.
+*/
+@interface LSURLDispatcher : NSObject
 
 
 #pragma mark -
 #pragma mark Singleton management
 
+/**
+ @brief Accessor for the LSURLDispatcher singleton.
+ <br/> At the first call the singleton is initialized.
+ @return The LSURLDispatcher singleton.
+ */
 + (LSURLDispatcher *) sharedDispatcher;
+
+/**
+ @brief Disposes of the current LSURLDispatcher singleton.
+ <br/> If <code>sharedDispatcher</code> is called again after <code>dispose</code>, a new singleton is initialized.
+ */
 + (void) dispose;
 
 
 #pragma mark -
-#pragma mark Thread pool management and notifications (for use by operations)
+#pragma mark Class properties
 
-- (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint;
-- (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint;
+/**
+ @brief Getter for the currently configured maximum number of concurrent long running requests.
+ <br/> Default value is 2.
+ @return The current maximum number of concurrent long running requests
+ */
++ (NSUInteger) maxLongRunningRequestsPerEndPoint;
 
-- (void) operationDidFinish:(LSURLDispatchOperation *)dispatchOp;
+/**
+ @brief Setter for the maximum number of concurrent long running requests.
+ @throws NSException If the specified number is bigger than the connection pool size.
+ */
++ (void) setMaxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint;
 
 
 #pragma mark -
 #pragma mark URL request dispatching and checking
 
-- (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse **)response error:(NSError **)error;
-- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate;
+/**
+ @brief Starts a synchronous request and waits for its completion.
+ <br/> If the connection pool is exhausted, the calling thread is put to wait until a connection is freed.
+ @param request The URL request to be submitted.
+ <br/> Note: the timeout interval specified on the request is honored and enforced.
+ @param response The HTTP URL response as returned by the end-point.
+ @param error If passed, may be filled with an NSError is case of a connection error.
+ @param delegate If passed, it is called as the connection request progresses in its completion.
+ @return The body of the HTTP response.
+ */
+- (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse * __autoreleasing *)response error:(NSError * __autoreleasing *)error delegate:(id <LSURLDispatchDelegate>)delegate;
+
+/**
+ @brief Starts a short request and runs it asynchronously.
+ @param request The URL request to be submitted.
+ <br/> Note: the timeout interval specified on the request is honored and enforced.
+ @param delegate The delegate to be called as the connection request progresses in its completion.
+ @return A descriptor of the ongoing URL request operation.
+ */
 - (LSURLDispatchOperation *) dispatchShortRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate;
 
+/**
+ @brief Starts a long request and runs it asynchronously.
+ <br/> If the maximum long running request limit is exceeded throws an exception.
+ @param request The URL request to be submitted.
+ <br/> Note: the timeout interval specified on the request is honored and enforced.
+ @param delegate The delegate to be called as the connection request progresses in its completion.
+ @return A descriptor of the ongoing URL request operation.
+ @throws NSException If the maximum long running request limit is exceeded.
+ @see maxLongRunningRequestsPerEndPoint.
+ */
+- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate;
+
+/**
+ @brief Starts a long request and runs it asynchronously.
+ <br/> If the maximum long running request limit is exceeded either throws an exception or not,
+ depending on the <code>ignoreMaxLongRunningRequestsLimit</code> param.
+ @param request The URL request to be submitted.
+ <br/> Note: the timeout interval specified on the request is honored and enforced.
+ @param delegate The delegate to be called as the connection request progresses in its completion.
+ @param ignoreMaxLongRunningRequestsLimit If set to <code>YES</code> will avoid throwing an exception if the
+ maximum long running request limit is exceeded. 
+ <br/> May be used in special cases where an exceptional long request for a certain end-point must be submitted in any case, 
+ but the limit must remain intact for other end-points.
+ @return A descriptor of the ongoing URL request operation.
+ @throws NSException If the maximum long running request limit is exceeded and the <code>ignoreMaxLongRunningRequestsLimit</code> 
+ parameter is not set.
+ @see maxLongRunningRequestsPerEndPoint.
+ */
+- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit;
+
+/**
+ @brief Checks if the end-point specified by the request currently has at least a spare long running connection to be used.
+ @param request The URL request to be checked.
+ @see maxLongRunningRequestsPerEndPoint.
+ @return <code>YES</code> if the end-point has a spare long running connection.
+ */
 - (BOOL) isLongRequestAllowed:(NSURLRequest *)request;
+
+/**
+ @brief Checks if the end-point specified by the URL currently has at least a spare long running connection to be used.
+ @param url The URL to be checked.
+ @return <code>YES</code> if the end-point has a spare long running connection.
+ @see maxLongRunningRequestsPerEndPoint.
+ */
 - (BOOL) isLongRequestAllowedToURL:(NSURL *)url;
+
+/**
+ @brief Checks if the end-point specified currently has at least a spare long running connection to be used.
+ @param host The host of the end-point to be checked.
+ @param port The port of the end-point to be checked.
+ @return <code>YES</code> if the end-point has a spare long running connection.
+ @see maxLongRunningRequestsPerEndPoint.
+ */
 - (BOOL) isLongRequestAllowedToHost:(NSString *)host port:(int)port;
 
 

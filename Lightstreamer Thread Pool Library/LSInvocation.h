@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 18/09/12.
-//  Copyright 2013 Weswit Srl
+//  Copyright 2013-2015 Weswit Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -20,38 +20,62 @@
 
 #import <Foundation/Foundation.h>
 
-@interface LSInvocation : NSObject {
-	id _target;
-	SEL _selector;
-	id _argument;
-	
-	NSCondition *_completionMonitor;
-	BOOL _completed;
-}
+
+/**
+ @brief Type used to characterize blocks that can be schedule for call with LSThreadPool.
+ */
+typedef void (^LSInvocationBlock)(void);
+
+
+/**
+ @brief LSInvocation describes a scheduled call, such as the target and selector, block or delay.
+ <br/> Provides a service to wait for its completion.
+ */
+@interface LSInvocation : NSObject
 
 
 #pragma mark -
-#pragma mark Initialization
+#pragma mark Completion monitoring
 
-+ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector;
-+ (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument;
-
-- (id) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument;
-
-
-#pragma mark -
-#pragma mark Completion monitoring (for custom use)
-
+/**
+ @brief Waits for the scheduled call to complete.
+ <br/> Puts the calling thread to wait until the scheduled call execution has been completed.
+ */
 - (void) waitForCompletion;
-- (void) completed;
 
 
 #pragma mark -
 #pragma mark Properties
 
+/**
+ @brief The block that must be called with this scheduled call.
+ <br/> May be nil if the scheduled call has been initialized with a target and selector.
+ */
+@property (nonatomic, readonly) LSInvocationBlock block;
+
+/**
+ @brief The target that must be called with this scheduled call.
+ <br/> May be nil if the scheduled call has been initialized with a block.
+ */
 @property (nonatomic, readonly) id target;
+
+/**
+ @brief The selector of the target to be called with this scheduled call.
+ <br/> May be nil.
+ */
 @property (nonatomic, readonly) SEL selector;
+
+/**
+ @brief The argument of the selector to be called with this scheduled call.
+ <br/> May be nil.
+ */
 @property (nonatomic, readonly) id argument;
+
+/**
+ @brief The delay to be waited for before executing the scheduled call.
+ <br/> NOTE: used internally by the LSTimerThread.
+ */
+@property (nonatomic, readonly) NSTimeInterval delay;
 
 
 @end
