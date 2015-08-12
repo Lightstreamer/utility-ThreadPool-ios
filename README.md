@@ -54,7 +54,7 @@ Then, schedule invocations with its `scheduleInvocationForTarget:selector:` or
 [threadPool scheduleInvocationForTarget:self selector:@selector(addOne)];
 ```
 
-If you want something more handy you can use blocks. E.g.:
+If you want something more handy you can use blocks. E.g.,
 
 ```objective-c
 [threadPool scheduleInvocationForBlock:^() {
@@ -79,7 +79,7 @@ LSURLDispatcher
 The `LSURLDispatcher` is a singleton and is able to automatically initialize itself. Use it to
 start a connection request toward a NSURLRequest in one of three possible ways:
 
-* as a **synschronous request**: in this case the dispatcher will download the request URL
+* as a **synschronous request**: in this case, the dispatcher will download the request URL
   and deliver it as a NSData; if the end-point is already at its connection limit,
   the caller will wait until a connection is freed;
 
@@ -89,7 +89,7 @@ start a connection request toward a NSURLRequest in one of three possible ways:
   for short-lived operations that are expected to last a few seconds only;
 
 * as a **long request**: the dispatcher will asynchronously connect only if the end-point is below 
-  a configured limit (by default lower than the connection limit), otherwise it will raise an exception; 
+  a configured limit (by default lower than the connection limit), otherwise, it will raise an exception; 
   use long requests for long-lived operations exepected to last for minutes or more (data streaming, 
   audio/video streaming, VoIP, etc.).
   
@@ -115,7 +115,7 @@ A request operation may be canceled at a later time, if necessary:
 ```
 
 With long operations you can also check in advance if a it is going to succeed
-or not (that is: to know if the limit has been reached or not):
+or not (that is, to know if the limit has been reached or not):
 
 ```objective-c
 [[LSURLDispatcher sharedDispatcher] setMaxLongRunningRequestsPerEndPoint:2];
@@ -147,7 +147,7 @@ A shared thread is used to schedule calls, so make sure your called methods do n
 to execute.
 
 To use the timer just schedule the call as you would do with `performSelector:withArgument:afterDelay`
-of `NSObject`. E.g.
+of `NSObject`. E.g.,
 
 ```objective-c
 [[LSTimerThread sharedTimer] performSelector:@selector(timeout) onTarget:self afterDelay:timeout];
@@ -189,4 +189,4 @@ License
 -------
 
 This software is part of Lightstreamer's iOS client library since version 1.2. It is released
-as open source under the Apache License 2.0. See LICENSE for more informations.
+as open source under the Apache License 2.0. See LICENSE for more information.
