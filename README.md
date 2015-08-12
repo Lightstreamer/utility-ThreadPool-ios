@@ -19,7 +19,7 @@ thread pool and not submitted to the system. The library also offers methods to 
 advance when a connection is going to succeed or time out for a given end-point. Last but
 not least, the library enforces the timeout set in the URL request.
 
-For more informations on this topic, please read the related article on Lightstreamer's blog:
+For more information on this topic, please read the related article on Lightstreamer's blog:
 
 * http://blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html
 
@@ -47,8 +47,8 @@ will be used for logging):
 LSThreadPool *threadPool= [[LSThreadPool alloc] initWithName:@"Test" size:4];
 ```
 	
-Then schedule invocations with its `scheduleInvocationForTarget:selector:` or 
-`scheduleInvocationForTarget:selector:withObject:` methods. E.g.:
+Then, schedule invocations with its `scheduleInvocationForTarget:selector:` or 
+`scheduleInvocationForTarget:selector:withObject:` methods. E.g.,
 
 ```objective-c
 [threadPool scheduleInvocationForTarget:self selector:@selector(addOne)];
@@ -190,4 +190,3 @@ License
 
 This software is part of Lightstreamer's iOS client library since version 1.2. It is released
 as open source under the Apache License 2.0. See LICENSE for more informations.
-
