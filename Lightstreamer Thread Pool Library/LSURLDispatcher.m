@@ -162,6 +162,11 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 #pragma mark URL request dispatching and checking
 
 - (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse * __autoreleasing *)response error:(NSError * __autoreleasing *)error delegate:(id <LSURLDispatchDelegate>)delegate {
+	if (!request)
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Request can't be nil"
+									 userInfo:nil];
+
 	NSString *endPoint= [self endPointForRequest:request];
 	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:YES isLong:NO];
 
@@ -182,6 +187,11 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 }
 
 - (LSURLDispatchOperation *) dispatchShortRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate {
+	if ((!request) || (!delegate))
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Request and/or delegate can't be nil"
+									 userInfo:nil];
+
 	NSString *endPoint= [self endPointForRequest:request];
 	
 	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:NO];
@@ -217,6 +227,11 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 }
 
 - (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit {
+	if ((!request) || (!delegate))
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Request and/or delegate can't be nil"
+									 userInfo:nil];
+
 	NSString *endPoint= [self endPointForRequest:request];
 
 	// Check if there's room for another long running request
@@ -267,18 +282,33 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 }
 
 - (BOOL) isLongRequestAllowed:(NSURLRequest *)request {
+	if (!request)
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Request can't be nil"
+									 userInfo:nil];
+
 	NSString *endPoint= [self endPointForRequest:request];
     
     return [self isLongRequestAllowedToEndPoint:endPoint];
 }
 
 - (BOOL) isLongRequestAllowedToURL:(NSURL *)url {
+	if (!url)
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"URL can't be nil"
+									 userInfo:nil];
+
 	NSString *endPoint= [self endPointForURL:url];
     
     return [self isLongRequestAllowedToEndPoint:endPoint];
 }
 
 - (BOOL) isLongRequestAllowedToHost:(NSString *)host port:(int)port {
+	if (!host)
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Host can't be nil"
+									 userInfo:nil];
+	
 	NSString *endPoint= [self endPointForHost:host port:port];
 
     return [self isLongRequestAllowedToEndPoint:endPoint];

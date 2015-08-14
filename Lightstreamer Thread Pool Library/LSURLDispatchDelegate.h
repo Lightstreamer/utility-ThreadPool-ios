@@ -47,7 +47,7 @@
  @see LSURLDispatchOperation.
  @see NSURLConnectionDataDelegate.
 */
-- (void) dispatchOperation:(LSURLDispatchOperation *)operation didReceiveResponse:(NSURLResponse *)response;
+- (void) dispatchOperation:(nonnull LSURLDispatchOperation *)operation didReceiveResponse:(nonnull NSURLResponse *)response;
 
 /**
  @brief Forwards the <code>connection:didReceiveData:</code> event of NSURLConnectionDataDelegate.
@@ -61,7 +61,7 @@
  @see LSURLDispatchOperation.
  @see NSURLConnectionDataDelegate.
  */
-- (void) dispatchOperation:(LSURLDispatchOperation *)operation didReceiveData:(NSData *)data;
+- (void) dispatchOperation:(nonnull LSURLDispatchOperation *)operation didReceiveData:(nonnull NSData *)data;
 
 /**
  @brief Forwards the <code>connection:didFailWithError:</code> event of NSURLConnectionDelegate.
@@ -72,7 +72,7 @@
  @see LSURLDispatchOperation.
  @see NSURLConnectionDelegate.
  */
-- (void) dispatchOperation:(LSURLDispatchOperation *)operation didFailWithError:(NSError *)error;
+- (void) dispatchOperation:(nonnull LSURLDispatchOperation *)operation didFailWithError:(nonnull NSError *)error;
 
 /**
  @brief Forwards the <code>connectionDidFinishLoading:</code> event of NSURLConnectionDataDelegate.
@@ -82,7 +82,7 @@
  @see LSURLDispatchOperation.
  @see NSURLConnectionDataDelegate.
  */
-- (void) dispatchOperationDidFinish:(LSURLDispatchOperation *)operation;
+- (void) dispatchOperationDidFinish:(nonnull LSURLDispatchOperation *)operation;
 
 
 @optional
@@ -98,7 +98,7 @@
  @see LSURLDispatchOperation.
  @see NSURLConnectionDelegate.
  */
-- (void) dispatchOperation:(LSURLDispatchOperation *)operation willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void) dispatchOperation:(nonnull LSURLDispatchOperation *)operation willSendRequestForAuthenticationChallenge:(nonnull NSURLAuthenticationChallenge *)challenge;
 
 
 @end

@@ -83,6 +83,11 @@
 	if ((self = [super init])) {
 		
 		// Initialization
+		if ((!name) || (!poolSize))
+			@throw [NSException exceptionWithName:NSInvalidArgumentException
+										   reason:@"Thread pool name can't be nil and pool size must be greater than 0"
+										 userInfo:nil];
+		
 		_name= name;
 		_size= poolSize;
 		

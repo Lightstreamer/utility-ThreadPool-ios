@@ -59,7 +59,7 @@
  <br/> At the first call the singleton is initialized.
  @return The LSURLDispatcher singleton.
  */
-+ (LSURLDispatcher *) sharedDispatcher;
++ (nonnull LSURLDispatcher *) sharedDispatcher;
 
 /**
  @brief Disposes of the current LSURLDispatcher singleton.
@@ -97,8 +97,9 @@
  @param error If passed, may be filled with an NSError is case of a connection error.
  @param delegate If passed, it is called as the connection request progresses in its completion.
  @return The body of the HTTP response.
+ @throws NSException If the request is <code>nil</code>.
  */
-- (NSData *) dispatchSynchronousRequest:(NSURLRequest *)request returningResponse:(NSURLResponse * __autoreleasing *)response error:(NSError * __autoreleasing *)error delegate:(id <LSURLDispatchDelegate>)delegate;
+- (nullable NSData *) dispatchSynchronousRequest:(nonnull NSURLRequest *)request returningResponse:(NSURLResponse * __autoreleasing __nullable * __nullable)response error:(NSError * __autoreleasing __nullable * __nullable)error delegate:(nullable id <LSURLDispatchDelegate>)delegate;
 
 /**
  @brief Starts a short request and runs it asynchronously.
@@ -106,8 +107,9 @@
  <br/> Note: the timeout interval specified on the request is honored and enforced.
  @param delegate The delegate to be called as the connection request progresses in its completion.
  @return A descriptor of the ongoing URL request operation.
+ @throws NSException If request and/or delegate are <code>nil</code>.
  */
-- (LSURLDispatchOperation *) dispatchShortRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate;
+- (nonnull LSURLDispatchOperation *) dispatchShortRequest:(nonnull NSURLRequest *)request delegate:(nonnull id <LSURLDispatchDelegate>)delegate;
 
 /**
  @brief Starts a long request and runs it asynchronously.
@@ -117,9 +119,10 @@
  @param delegate The delegate to be called as the connection request progresses in its completion.
  @return A descriptor of the ongoing URL request operation.
  @throws NSException If the maximum long running request limit is exceeded.
+ @throws NSException If request and/or delegate are <code>nil</code>.
  @see maxLongRunningRequestsPerEndPoint.
  */
-- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate;
+- (nonnull LSURLDispatchOperation *) dispatchLongRequest:(nonnull NSURLRequest *)request delegate:(nonnull id <LSURLDispatchDelegate>)delegate;
 
 /**
  @brief Starts a long request and runs it asynchronously.
@@ -135,34 +138,38 @@
  @return A descriptor of the ongoing URL request operation.
  @throws NSException If the maximum long running request limit is exceeded and the <code>ignoreMaxLongRunningRequestsLimit</code> 
  parameter is not set.
+ @throws NSException If request and/or delegate are <code>nil</code>.
  @see maxLongRunningRequestsPerEndPoint.
  */
-- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit;
+- (nonnull LSURLDispatchOperation *) dispatchLongRequest:(nonnull NSURLRequest *)request delegate:(nonnull id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit;
 
 /**
  @brief Checks if the end-point specified by the request currently has at least a spare long running connection to be used.
  @param request The URL request to be checked.
- @see maxLongRunningRequestsPerEndPoint.
  @return <code>YES</code> if the end-point has a spare long running connection.
+ @throws NSException If the request is <code>nil</code>.
+ @see maxLongRunningRequestsPerEndPoint.
  */
-- (BOOL) isLongRequestAllowed:(NSURLRequest *)request;
+- (BOOL) isLongRequestAllowed:(nonnull NSURLRequest *)request;
 
 /**
  @brief Checks if the end-point specified by the URL currently has at least a spare long running connection to be used.
  @param url The URL to be checked.
  @return <code>YES</code> if the end-point has a spare long running connection.
+ @throws NSException If the URL is <code>nil</code>.
  @see maxLongRunningRequestsPerEndPoint.
  */
-- (BOOL) isLongRequestAllowedToURL:(NSURL *)url;
+- (BOOL) isLongRequestAllowedToURL:(nonnull NSURL *)url;
 
 /**
  @brief Checks if the end-point specified currently has at least a spare long running connection to be used.
  @param host The host of the end-point to be checked.
  @param port The port of the end-point to be checked.
  @return <code>YES</code> if the end-point has a spare long running connection.
+ @throws NSException If the host is <code>nil</code>.
  @see maxLongRunningRequestsPerEndPoint.
  */
-- (BOOL) isLongRequestAllowedToHost:(NSString *)host port:(int)port;
+- (BOOL) isLongRequestAllowedToHost:(nonnull NSString *)host port:(int)port;
 
 
 @end

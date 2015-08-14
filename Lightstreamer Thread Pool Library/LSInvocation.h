@@ -51,25 +51,25 @@ typedef void (^LSInvocationBlock)(void);
  @brief The block that must be called with this scheduled call.
  <br/> May be nil if the scheduled call has been initialized with a target and selector.
  */
-@property (nonatomic, readonly) LSInvocationBlock block;
+@property (nonatomic, readonly, nullable) LSInvocationBlock block;
 
 /**
  @brief The target that must be called with this scheduled call.
  <br/> May be nil if the scheduled call has been initialized with a block.
  */
-@property (nonatomic, readonly) id target;
+@property (nonatomic, readonly, nullable) id target;
 
 /**
  @brief The selector of the target to be called with this scheduled call.
  <br/> May be nil.
  */
-@property (nonatomic, readonly) SEL selector;
+@property (nonatomic, readonly, nullable) SEL selector;
 
 /**
  @brief The argument of the selector to be called with this scheduled call.
  <br/> May be nil.
  */
-@property (nonatomic, readonly) id argument;
+@property (nonatomic, readonly, nullable) id argument;
 
 /**
  @brief The delay to be waited for before executing the scheduled call.

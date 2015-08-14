@@ -49,12 +49,12 @@
 /**
  @brief The original URL request for this operation.
  */
-@property (nonatomic, readonly) NSURLRequest *request;
+@property (nonatomic, readonly, nonnull) NSURLRequest *request;
 
 /**
  @brief The URL request end-point, expressed as "host:port".
  */
-@property (nonatomic, readonly) NSString *endPoint;
+@property (nonatomic, readonly, nonnull) NSString *endPoint;
 
 /**
  @brief If the URL request operation has been started as a long running request.
@@ -65,19 +65,19 @@
  @brief The HTTP URL response as returned by the end-point.
  <br/> Initially nil, it is filled as the URL request operation progresses.
  */
-@property (nonatomic, readonly) NSURLResponse *response;
+@property (nonatomic, readonly, nullable) NSURLResponse *response;
 
 /**
  @brief An eventual connection error, if the URL request operation cannot be completed.
  */
-@property (nonatomic, readonly) NSError *error;
+@property (nonatomic, readonly, nullable) NSError *error;
 
 /**
  @brief When using synchronous requests, contains the body of the HTTP response.
  <br/> Initially nil, it is filled as the URL request operation progresses. When using short or long requests,
  this value remains nil (i.e. collecting the data is up to the delegate).
  */
-@property (nonatomic, readonly) NSData *data;
+@property (nonatomic, readonly, nullable) NSData *data;
 
 
 @end

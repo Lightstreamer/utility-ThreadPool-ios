@@ -43,10 +43,10 @@
  @brief Sets a new log delegate. Once a delegate is set, all subsequent log lines are redirected to the delegate.
  <br/> The local logging system will just provide line formatting, no log messages will be written to the console or
  other destinations if not by delegate's initiative.
- @param delegate The log delegate, or nil to revert to the local logging system.
+ @param delegate The log delegate, or <code>nil</code> to revert to the local logging system.
  @see LSLogDelegate.
  */
-+ (void) setDelegate:(id <LSLogDelegate>)delegate;
++ (void) setDelegate:(nullable id <LSLogDelegate>)delegate;
 
 
 #pragma mark -

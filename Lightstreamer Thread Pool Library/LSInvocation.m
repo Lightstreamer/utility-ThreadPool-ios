@@ -63,24 +63,44 @@
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector {
+	if (!selector) // Target is check in the initializer
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Selector can't be nil"
+									 userInfo:nil];
+	
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:0.0];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector delay:(NSTimeInterval)delay {
+	if (!selector) // Target is check in the initializer
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Selector can't be nil"
+									 userInfo:nil];
+
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:delay];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument {
+	if (!selector) // Target is check in the initializer
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Selector can't be nil"
+									 userInfo:nil];
+
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:0.0];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
+	if (!selector) // Target is check in the initializer
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"Selector can't be nil"
+									 userInfo:nil];
+	
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:delay];
 	
 	return invocation;
@@ -90,6 +110,11 @@
 	if ((self = [super init])) {
 		
 		// Initialization
+		if (!block)
+			@throw [NSException exceptionWithName:NSInvalidArgumentException
+										   reason:@"Block can't be nil"
+										 userInfo:nil];
+
 		_block= [block copy];
 	}
 	
@@ -100,6 +125,11 @@
 	if ((self = [super init])) {
 		
 		// Initialization
+		if (!target)
+			@throw [NSException exceptionWithName:NSInvalidArgumentException
+										   reason:@"Target can't be nil"
+										 userInfo:nil];
+		
 		_target= target;
 		_selector= selector;
 		_argument= argument;

@@ -40,16 +40,18 @@
  @param poolSize The maximum size of the thread pool. Threads are created on-demand,
  hence in any moment there may be up to <code>poolSize</code> threads.
  @return The created thread pool.
+ @throws NSException If the name is <code>nil</code> or the pool size is 0.
  */
-+ (LSThreadPool *) poolWithName:(NSString *)name size:(NSUInteger)poolSize;
++ (nonnull LSThreadPool *) poolWithName:(nonnull NSString *)name size:(NSUInteger)poolSize;
 
 /**
  @brief Initializes an LSThreadPool with the specified name and size.
  @param name The name of the thread pool, used when logging to diagnose problems.
  @param poolSize The maximum size of the thread pool. Threads are created on-demand,
  hence in any moment there may be up to <code>poolSize</code> threads.
+ @throws NSException If the name is <code>nil</code> or the pool size is 0.
  */
-- (id) initWithName:(NSString *)name size:(NSUInteger)poolSize;
+- (nonnull id) initWithName:(nonnull NSString *)name size:(NSUInteger)poolSize;
 
 /**
  @brief Disposes of any active thread and makes the thread pool no more usable.
@@ -69,12 +71,14 @@
  @param block The block to be executed.
  @return A descriptor of the scheduled call.
  <br/> May be used to wait for its completion.
+ @throws NSException If the block is <code>nil</code>.
  @throws NSException If the thread pool has already been disposed of.
  */
-- (LSInvocation *) scheduleInvocationForBlock:(LSInvocationBlock)block;
+- (nonnull LSInvocation *) scheduleInvocationForBlock:(nonnull LSInvocationBlock)block;
 
 /**
  @brief Schedules a call to the specified target and selector.
+ <br/> The selector (method signature) must have no arguments.
  <br/> If the current size of the thread pool is less than <code>poolSize</code>, a new thread is
  created and the call is executed immediately. Otherwise the call is stored in the queue and will
  be executed on a first-in-first-served basis.
@@ -82,23 +86,26 @@
  @param selector The selector of the target to be called.
  @return A descriptor of the scheduled call.
  <br/> May be used to wait for its completion.
+ @throws NSException If the target or selector are <code>nil</code>.
  @throws NSException If the thread pool has already been disposed of.
  */
-- (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector;
+- (nonnull LSInvocation *) scheduleInvocationForTarget:(nonnull id)target selector:(nonnull SEL)selector;
 
 /**
  @brief Schedules a call to the specified target and selector with the specified argument.
+ <br/> The selector (method signature) must have exactly one argument.
  <br/> If the current size of the thread pool is less than <code>poolSize</code>, a new thread is
  created and the call is executed immediately. Otherwise the call is stored in the queue and will
  be executed on a first-in-first-served basis.
  @param target The target of the call.
  @param selector The selector of the target to be called.
- @param object The argument of the selector to be called.
+ @param object The argument of the selector to be called. A <code>nil</code> is accepted.
  @return A descriptor of the scheduled call.
  <br/> May be used to wait for its completion.
+ @throws NSException If the target or selector are <code>nil</code>.
  @throws NSException If the thread pool has already been disposed of.
  */
-- (LSInvocation *) scheduleInvocationForTarget:(id)target selector:(SEL)selector withObject:(id)object;
+- (nonnull LSInvocation *) scheduleInvocationForTarget:(nonnull id)target selector:(nonnull SEL)selector withObject:(nullable id)object;
 
 
 #pragma mark -

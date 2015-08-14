@@ -37,7 +37,7 @@
  <br/> At the first call the singleton is initialized.
  @return The LSTimerThread singleton.
  */
-+ (LSTimerThread *) sharedTimer;
++ (nonnull LSTimerThread *) sharedTimer;
 
 /**
  @brief Disposes of the current LSTimerThread singleton.
@@ -56,8 +56,9 @@
  @param target Target (object) to be called.
  @param argument Single argument (parameter) of the selector. A <code>nil</code> is accepted.
  @param delay Delay of the call, expressed as seconds.
+ @throws NSException If the target or selector are <code>nil</code>.
  */
-- (void) performSelector:(SEL)selector onTarget:(id)target withObject:(id)argument afterDelay:(NSTimeInterval)delay;
+- (void) performSelector:(nonnull SEL)selector onTarget:(nonnull id)target withObject:(nullable id)argument afterDelay:(NSTimeInterval)delay;
 
 /**
  @brief Schedules a delayed call of a target and selector with an argument.
@@ -65,8 +66,9 @@
  @param selector Selector (method signature) to be called.
  @param target Target (object) to be called.
  @param delay Delay of the call, expressed as seconds.
+ @throws NSException If the target or selector are <code>nil</code>.
  */
-- (void) performSelector:(SEL)selector onTarget:(id)target afterDelay:(NSTimeInterval)delay;
+- (void) performSelector:(nonnull SEL)selector onTarget:(nonnull id)target afterDelay:(NSTimeInterval)delay;
 
 /**
  @brief Cancels a previously scheduled call to the specified target and selector and with the specified argument.
@@ -75,8 +77,9 @@
  @param target Target (object) previously scheduled for a call.
  @param selector Selector (method signature) previously scheduled for a call.
  @param argument Single argument (parameter) of the selector previously scheduled for a call. A <code>nil</code> is accepted.
+ @throws NSException If the target or selector are <code>nil</code>.
  */
-- (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector object:(id)argument;
+- (void) cancelPreviousPerformRequestsWithTarget:(nonnull id)target selector:(nonnull SEL)selector object:(nullable id)argument;
 
 /**
  @brief Cancels a previously scheduled call to the specified target and selector with no arguments.
@@ -84,15 +87,17 @@
  an argument, or it will not be canceled.
  @param target Target (object) previously scheduled for a call.
  @param selector Selector (method signature) previously scheduled for a call.
+ @throws NSException If the target or selector are <code>nil</code>.
  */
-- (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector;
+- (void) cancelPreviousPerformRequestsWithTarget:(nonnull id)target selector:(nonnull SEL)selector;
 
 /**
  @brief Cancels any previously scheduled call to the specified target.
  <br/> Any scheduled call for the target, whatever the selector or the argument specified, will be canceled.
  @param target Target (object) previously scheduled for a call.
+ @throws NSException If the target is <code>nil</code>.
  */
-- (void) cancelPreviousPerformRequestsWithTarget:(id)target;
+- (void) cancelPreviousPerformRequestsWithTarget:(nonnull id)target;
 
 
 @end
