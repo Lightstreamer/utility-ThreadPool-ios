@@ -27,7 +27,7 @@ What is included:
 
 * an `LSThreadPool` class that lets you execute invocations on a fixed thread pool, and
 
-* an `LSURLDispatcherPool` class that uses a thread pool to keep the number of concurrent
+* an `LSURLDispatcher` class that uses a thread pool to keep the number of concurrent
   connections by end-point under control.
   
 * a bonus `LSTimerThread` class that lets you run timed invocation without using the
