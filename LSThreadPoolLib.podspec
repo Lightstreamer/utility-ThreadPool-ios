@@ -8,9 +8,13 @@ Pod::Spec.new do |s|
   s.summary      = "Lightstreamer Thread Pool and URL Dispatch Library"
 
   s.description  = <<-DESC
-                   This library mainly addresses the limited size of the
-                   connection pool of iOS. It contains the following utility
-                   classes:
+                   This library addresses the limited size of the connection
+                   pool of iOS. For more background information on this issue
+                   please see:
+
+                   * http://blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html
+
+                   The library contains the following utility classes:
 
                    * LSURLDispatcher: provides services to connect to a URL,
                    synchronously and asynchronously, while ensuring the
