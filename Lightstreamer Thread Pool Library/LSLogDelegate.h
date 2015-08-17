@@ -38,7 +38,7 @@
  the actual log message. The line does not contain any line-endings.
  @param logLine The log line to be appended.
  */
-- (void) appendLogLine:(NSString *)logLine;
+- (void) appendLogLine:(nonnull NSString *)logLine;
 
 
 @end
