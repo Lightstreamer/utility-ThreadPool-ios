@@ -20,11 +20,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "LSThreadPool.h"
-#import "LSURLDispatcher.h"
-#import "LSURLDispatchDelegate.h"
-#import "LSURLDispatchOperation.h"
-#import "LSLog.h"
+#import "LSThreadPoolLib.h"
 
 #define THREAD_POOL_TEST_COUNT                              (100)
 #define THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS             (1000)
