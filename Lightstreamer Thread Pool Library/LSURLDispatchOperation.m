@@ -62,7 +62,7 @@
 #pragma mark -
 #pragma mark Internal threaded operations
 
-- (void) threadStart;
+- (void) threadStart:(NSURLRequest *)request;
 - (void) threadCancel;
 - (void) threadTimeout;
 
@@ -105,14 +105,23 @@
 
 	if (_gathedData)
 		_data= [[NSMutableData alloc] init];
-	
-	// Start the timeout timer (if present)
+    
+    // Prepare a copy of the request
+    NSMutableURLRequest *request= [_request mutableCopy];
+    
+    // Check timeout
 	NSTimeInterval timeout= [_request timeoutInterval];
-	if (timeout > 0.0)
+    if (timeout > 0.0) {
+        
+        // Start the local timeout timer and clear the timeout for
+        // the operating system (can't be trusted)
 		[[LSTimerThread sharedTimer] performSelector:@selector(timeout) onTarget:self afterDelay:timeout];
 
+        [request setTimeoutInterval:0.0];
+    }
+
 	// Start the connection on the dispatcher thread
-	[self performSelector:@selector(threadStart) onThread:_thread withObject:nil waitUntilDone:NO];
+    [self performSelector:@selector(threadStart:) onThread:_thread withObject:request waitUntilDone:NO];
 }
 
 - (void) startAndWaitForCompletion {
@@ -260,7 +269,7 @@
 #pragma mark -
 #pragma mark Internal threaded start
 
-- (void) threadStart {
+- (void) threadStart:(NSURLRequest *)request {
 
 	// Get run loop for dispather thread
 	NSRunLoop *runLoop= [NSRunLoop currentRunLoop];
@@ -268,14 +277,14 @@
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"starting connection of operation %p for end-point: %@ on thread: %p", self, _endPoint, _thread];
 	
 	// Create a new connection
-	_connection= [[NSURLConnection alloc] initWithRequest:_request delegate:self];
+	_connection= [[NSURLConnection alloc] initWithRequest:request delegate:self];
 	if (!_connection) {
 		
 		// No connection created
 		NSError *error= [NSError errorWithDomain:ERROR_DOMAIN
 											code:ERROR_CODE_NO_CONNECTION
 										userInfo:@{NSLocalizedDescriptionKey: @"Couldn't create a new connection to requested URL",
-												   NSURLErrorKey: _request.URL}];
+												   NSURLErrorKey: request.URL}];
 		
 		// Handle the error as a common connection error
 		[self connection:_connection didFailWithError:error];
