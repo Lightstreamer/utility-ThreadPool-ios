@@ -76,7 +76,7 @@
 #pragma mark -
 #pragma mark LSURLDispatcher statics
 
-static LSURLDispatcher *__sharedDispatcher= nil;
+static LSURLDispatcher *__sharedDispatcher = nil;
 static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT;
 
 
@@ -108,8 +108,6 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 	@synchronized ([LSURLDispatcher class]) {
 		if (__sharedDispatcher) {
 			[__sharedDispatcher stopThreads];
-			
-			__sharedDispatcher= nil;
 		}
 	}
 }
@@ -154,7 +152,8 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 }
 
 - (void) dealloc {
-	[LSURLDispatcher dispose];
+    // It's called in case if instance was created bypassing a sharedDispatcher initialization
+    [__sharedDispatcher stopThreads];
 }
 
 
