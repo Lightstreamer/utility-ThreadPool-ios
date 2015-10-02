@@ -153,7 +153,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 
 - (void) dealloc {
     // It's called in case if instance was created bypassing a sharedDispatcher initialization
-    [__sharedDispatcher stopThreads];
+    [self stopThreads];
 }
 
 
