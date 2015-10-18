@@ -63,6 +63,9 @@
 	
 	// Create thread pool
 	_threadPool= [[LSThreadPool alloc] initWithName:@"Test" size:4];
+    
+    // Ensure the URL dispatcher singleton is ready
+    [LSURLDispatcher sharedDispatcher];
 }
 
 - (void) tearDown {

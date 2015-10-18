@@ -106,11 +106,8 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 		return;
 	
 	@synchronized ([LSURLDispatcher class]) {
-		if (__sharedDispatcher) {
-			[__sharedDispatcher stopThreads];
-			
+		if (__sharedDispatcher)
 			__sharedDispatcher= nil;
-		}
 	}
 }
 
@@ -154,7 +151,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 }
 
 - (void) dealloc {
-	[LSURLDispatcher dispose];
+    [self stopThreads];
 }
 
 
