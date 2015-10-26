@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
                    LSURLDispatcher but available for other uses.
                    DESC
 
-  s.homepage     = "https://github.com/Weswit/utility-ThreadPool-ios"
+  s.homepage     = "https://github.com/Lightstreamer/utility-ThreadPool-ios"
 
 
   # ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -58,7 +58,7 @@ Pod::Spec.new do |s|
 
   # ――― Source Location ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
-  s.source       = { :git => "https://github.com/Weswit/utility-ThreadPool-ios.git",
+  s.source       = { :git => "https://github.com/Lightstreamer/utility-ThreadPool-ios.git",
                      :tag => s.version.to_s }
 
 
