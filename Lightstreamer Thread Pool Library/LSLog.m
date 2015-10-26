@@ -3,7 +3,7 @@
 //  Lightstreamer Thread Pool Library
 //
 //  Created by Gianluca Bertani on 13/03/11.
-//  Copyright 2011-2015 Weswit srl. All rights reserved.
+//  Copyright (c) Lightstreamer Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
