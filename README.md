@@ -157,6 +157,12 @@ their own run loop;
 * with `NSURLSession`, requests are operated on the session's own threads, but `LSURLDispatcher` threads are 
 still used for operations' delegate event delivery.
 
+Also starting with version 1.6, the `LSURLDispatcher` may be safely used as a common instanced object, and not
+as a singleton, but beware: since the end-point request limit is enforced at the instance level, using multiple
+instances of `LSURLDispatcher` to access the same end-point will make the enforcement ineffective, and you could get 
+fake timeouts as if you were not using the `LSURLDispatcher` at all. Since the connection limit is system-wide, 
+the countermeasure, to be effective, *must* used as a singleton.
+
 
 LSTimerThread
 -------------
