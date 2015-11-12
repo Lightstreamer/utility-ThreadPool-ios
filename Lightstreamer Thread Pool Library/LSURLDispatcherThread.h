@@ -31,19 +31,19 @@
 
 
 #pragma mark -
-#pragma mark Initialization
+#pragma mark Initialization (for internal use only)
 
 - (instancetype) initWithDispatcher:(LSURLDispatcher *)dispatcher;
 
 
 #pragma mark -
-#pragma mark Execution control
+#pragma mark Execution control (for internal use only)
 
 - (void) stopThread;
 
 
 #pragma mark -
-#pragma mark Properties
+#pragma mark Properties (for internal use only)
 
 @property (nonatomic, assign) NSTimeInterval lastActivity;
 

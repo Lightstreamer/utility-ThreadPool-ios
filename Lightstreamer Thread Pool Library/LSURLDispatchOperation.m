@@ -408,7 +408,7 @@
             // No task created
             NSError *error= [NSError errorWithDomain:ERROR_DOMAIN
                                                 code:ERROR_CODE_NO_CONNECTION
-                                            userInfo:@{NSLocalizedDescriptionKey: @"Couldn't create a new task to requested URL",
+                                            userInfo:@{NSLocalizedDescriptionKey: @"Couldn't create a new task for requested URL",
                                                        NSURLErrorKey: request.URL}];
             
             // Handle the error as a common connection error

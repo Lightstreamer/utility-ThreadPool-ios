@@ -230,7 +230,7 @@
 		poolSize= [_threads count];
     }
 	
-	[LSLog sourceType:LOG_SRC_THREAD_POOL source:self log:@"collected threads for for pool %@, pool size is now: %lu", _name, (unsigned long) poolSize];
+	[LSLog sourceType:LOG_SRC_THREAD_POOL source:self log:@"collected threads for pool %@, pool size is now: %lu", _name, (unsigned long) poolSize];
 	
 	// Schedule new executions if there are still threads operating
 	if (poolSize > 0)

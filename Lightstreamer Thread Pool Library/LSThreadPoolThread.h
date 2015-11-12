@@ -31,7 +31,7 @@
 
 
 #pragma mark -
-#pragma mark Initialization
+#pragma mark Initialization (for internal use only)
 
 - (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor;
 
@@ -39,7 +39,7 @@
 
 
 #pragma mark -
-#pragma mark Properties
+#pragma mark Properties (for internal use only)
 
 @property (nonatomic, readonly) BOOL working;
 @property (nonatomic, readonly) NSTimeInterval lastActivity;

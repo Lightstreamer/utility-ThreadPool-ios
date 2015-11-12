@@ -22,7 +22,6 @@
 
 
 @class LSURLDispatchOperation;
-@class LSURLDispatcherThread;
 @protocol LSURLDispatchDelegate;
 
 /**

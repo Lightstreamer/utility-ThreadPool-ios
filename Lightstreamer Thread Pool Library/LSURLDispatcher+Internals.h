@@ -28,7 +28,7 @@
 
 
 #pragma mark -
-#pragma mark Finalization
+#pragma mark Finalization (for internal use only)
 
 - (void) dispose;
 
