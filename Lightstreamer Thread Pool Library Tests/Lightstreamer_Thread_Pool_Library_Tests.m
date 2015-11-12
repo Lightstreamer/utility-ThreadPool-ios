@@ -23,8 +23,8 @@
 #import "LSThreadPoolLib.h"
 
 #define THREAD_POOL_TEST_COUNT                              (100)
-#define THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS             (1000)
-#define THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS      (2000)
+#define THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS              (200)
+#define THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS      (1000)
 
 #define URL_DISPATCHER_TEST_URL                              (@"http://support.apple.com/downloads/DL1581/en_US/OSXUpdCombo10.8.2.dmg")
 #define URL_DISPATCHER_TEST_COUNT                            (20)
