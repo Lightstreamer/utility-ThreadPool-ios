@@ -138,7 +138,7 @@ dedicated to decoupling the caller from the wait of a free connection.
 Threads are recycled if another request arrives within 10 seconds. After 15 seconds
 a collector removes idle threads.
 
-Starting with **version 1.6**, `LSURLDispatcher` uses a shared `NSURLSession` and a separate `NSURLSessionDataTask` 
+Starting with **version 1.6.0**, `LSURLDispatcher` uses a shared `NSURLSession` and a separate `NSURLSessionDataTask` 
 for each operation, in place of an `NSURLConnection`. It reverts to `NSURLConnection` when `NSURLSession` is not
 available, i.e. for iOS < 7.0 and OS X < 10.9.
 
@@ -157,7 +157,7 @@ their own run loop;
 * with `NSURLSession`, requests are operated on the session's own threads, but `LSURLDispatcher` threads are 
 still used for operations' delegate event delivery.
 
-Also starting with version 1.6, the `LSURLDispatcher` may be safely used as a common instanced object, and not
+Also starting with version 1.6.0, the `LSURLDispatcher` may be safely used as a common instanced object, and not
 as a singleton, but beware: since the end-point request limit is enforced at the instance level, using multiple
 instances of `LSURLDispatcher` to access the same end-point will make the enforcement ineffective, and you could get 
 fake timeouts as if you were not using the `LSURLDispatcher` at all. Since the connection limit is system-wide, 
