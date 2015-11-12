@@ -37,8 +37,8 @@
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument;
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay;
 
-- (id) initWithBlock:(LSInvocationBlock)block;
-- (id) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay;
+- (instancetype) initWithBlock:(LSInvocationBlock)block;
+- (instancetype) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay;
 
 
 #pragma mark -

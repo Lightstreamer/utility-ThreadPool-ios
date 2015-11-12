@@ -26,7 +26,8 @@
 #define THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS             (1000)
 #define THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS      (2000)
 
-#define URL_DISPATCHER_TEST_COUNT                           (100)
+#define URL_DISPATCHER_TEST_URL                              (@"http://support.apple.com/downloads/DL1581/en_US/OSXUpdCombo10.8.2.dmg")
+#define URL_DISPATCHER_TEST_COUNT                            (20)
 #define URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES            (10000)
 #define URL_DISPATCHER_TEST_TIMEOUT                          (10.0)
 
@@ -36,7 +37,6 @@
 
 @interface Lightstreamer_Thread_Pool_Library_Tests : XCTestCase <LSURLDispatchDelegate> {
 	LSThreadPool *_threadPool;
-	LSURLDispatcher *_urlDispatcher;
 	
 	NSUInteger _count;
 	NSUInteger _failedCount;
@@ -63,9 +63,6 @@
 	
 	// Create thread pool
 	_threadPool= [[LSThreadPool alloc] initWithName:@"Test" size:4];
-    
-    // Ensure the URL dispatcher singleton is ready
-    [LSURLDispatcher sharedDispatcher];
 }
 
 - (void) tearDown {
@@ -141,12 +138,13 @@
 }
 
 /**
- @brief This test will run 100 concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
+ @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
  <br/> You can monitor the pool size and thread execution on the console. Short requests are used to download the data. Consider
  that some of the requests may genuinely time out due to network conditions, these requests are not counted to check if the test
  succeeded.
+ <br/> NOTE: this test uses NSURLConnection.
  */ 
-- (void) testURLDispatcher {
+- (void) testURLDispatcherWithURLConnections {
 	[LSLog disableAllSourceTypes];
 	[LSLog enableSourceType:LOG_SRC_URL_DISPATCHER];
 	
@@ -157,9 +155,12 @@
 	
 	_semaphore= [[NSCondition alloc] init];
 	[_semaphore lock];
+    
+    // Avoid using NSURLSession
+    [LSURLDispatcher setUseNSURLSessionIfAvailable:NO];
 
-	// Use Apple's OS X 10.8.2 Combo Update, which is long enough
-	NSURL *url= [NSURL URLWithString:@"http://support.apple.com/downloads/DL1581/en_US/OSXUpdCombo10.8.2.dmg"];
+    // Use a download long enough, e.g. a Lightstreamer distribution
+	NSURL *url= [NSURL URLWithString:URL_DISPATCHER_TEST_URL];
 	NSMutableURLRequest *req= [NSMutableURLRequest requestWithURL:url];
 	[req setTimeoutInterval:URL_DISPATCHER_TEST_TIMEOUT];
 
@@ -178,6 +179,50 @@
 		sum += [download length];
 	
 	XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
+}
+
+/**
+ @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
+ <br/> You can monitor the pool size and thread execution on the console. Short requests are used to download the data. Consider
+ that some of the requests may genuinely time out due to network conditions, these requests are not counted to check if the test
+ succeeded.
+ <br/> NOTE: this test uses NSURLSession if available (supposedly yes).
+ */
+- (void) testURLDispatcherWithURLSession {
+    [LSLog disableAllSourceTypes];
+    [LSLog enableSourceType:LOG_SRC_URL_DISPATCHER];
+    
+    _count= 0;
+    _failedCount= 0;
+    
+    _downloads= [[NSMutableDictionary alloc] init];
+    
+    _semaphore= [[NSCondition alloc] init];
+    [_semaphore lock];
+    
+    // Avoid using NSURLSession
+    [LSURLDispatcher setUseNSURLSessionIfAvailable:YES];
+    
+    // Use a download long enough, e.g. a Lightstreamer distribution
+    NSURL *url= [NSURL URLWithString:URL_DISPATCHER_TEST_URL];
+    NSMutableURLRequest *req= [NSMutableURLRequest requestWithURL:url];
+    [req setTimeoutInterval:URL_DISPATCHER_TEST_TIMEOUT];
+    
+    for (int i= 0; i < URL_DISPATCHER_TEST_COUNT; i++)
+        [[LSURLDispatcher sharedDispatcher] dispatchShortRequest:req delegate:self];
+    
+    NSLog(@"TestThreadPool: operations dispatched, waiting...");
+    
+    [_semaphore wait];
+    [_semaphore unlock];
+    
+    _semaphore= nil;
+    
+    NSUInteger sum= 0;
+    for (NSMutableData *download in [_downloads allValues])
+        sum += [download length];
+    
+    XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
 }
 
 
@@ -225,7 +270,7 @@
 	}
 	
 	if (downloaded)
-		NSLog(@"Operation %p: dowloaded: %lu bytes (count: %lu, failed count: %lu)", operation, (unsigned long) downloaded, (unsigned long) _count, (unsigned long) _failedCount);
+		NSLog(@"Operation %p: downloaded: %lu bytes (count: %lu, failed count: %lu)", operation, (unsigned long) downloaded, (unsigned long) _count, (unsigned long) _failedCount);
 
 	if (finished) {
 		

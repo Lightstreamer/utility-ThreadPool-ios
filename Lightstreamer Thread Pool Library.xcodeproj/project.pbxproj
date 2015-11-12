@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		8C0879611B7A242100AAA3AA /* LSLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C0879601B7A242100AAA3AA /* LSLog.m */; };
+		8C981D9C1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C981D9A1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h */; };
+		8C981D9D1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
+		8C981D9E1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
 		8CF15FA0169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
 		8CF15FB2169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
 		8CF15FB5169D70050024547C /* libLSThreadPoolLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */; };
@@ -72,6 +75,8 @@
 		8C0879651B7A5B3100AAA3AA /* LSThreadPoolLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LSThreadPoolLib.h; sourceTree = "<group>"; };
 		8C0879661B7A5EE300AAA3AA /* LSURLDispatchOperation+Internals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LSURLDispatchOperation+Internals.h"; sourceTree = "<group>"; };
 		8C66946B17394C92002ECD9C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		8C981D9A1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLAuthenticationChallengeSender.h; sourceTree = "<group>"; };
+		8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLAuthenticationChallengeSender.m; sourceTree = "<group>"; };
 		8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLSThreadPoolLib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15F9F169D70050024547C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8CF15FA3169D70050024547C /* Lightstreamer Thread Pool Library-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lightstreamer Thread Pool Library-Prefix.pch"; sourceTree = "<group>"; };
@@ -189,6 +194,8 @@
 				8CF15FDC169D767A0024547C /* LSURLDispatchOperation.h */,
 				8C0879661B7A5EE300AAA3AA /* LSURLDispatchOperation+Internals.h */,
 				8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */,
+				8C981D9A1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h */,
+				8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */,
 				8CF15FD5169D767A0024547C /* LSTimerThread.h */,
 				8CF15FD6169D767A0024547C /* LSTimerThread.m */,
 				8C08795F1B7A242100AAA3AA /* LSLog.h */,
@@ -232,6 +239,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8C981D9C1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,6 +416,7 @@
 				8CF15FE2169D767A0024547C /* LSURLDispatcher.m in Sources */,
 				8CF15FE3169D767A0024547C /* LSURLDispatcherThread.m in Sources */,
 				8CF15FE4169D767A0024547C /* LSURLDispatchOperation.m in Sources */,
+				8C981D9D1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +440,7 @@
 				8CFC75BC1B83737D0026AE74 /* LSURLDispatchOperation.m in Sources */,
 				8CFC75BD1B83737D0026AE74 /* LSTimerThread.m in Sources */,
 				8CFC75BE1B83737D0026AE74 /* LSLog.m in Sources */,
+				8C981D9E1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

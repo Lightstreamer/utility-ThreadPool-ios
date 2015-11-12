@@ -18,6 +18,11 @@
 //  limitations under the License.
 //
 
+#import "LSURLDispatchOperation.h"
+
+
+@class LSURLDispatcher;
+
 
 #pragma mark -
 #pragma mark LSURLDispatchOperation Internals category
@@ -28,7 +33,7 @@
 #pragma mark -
 #pragma mark Initialization (for internal use only)
 
-- (id) initWithURLRequest:(NSURLRequest *)request endPoint:(NSString *)endPoint delegate:(id <LSURLDispatchDelegate>)delegate gatherData:(BOOL)gatherData isLong:(BOOL)isLong;
+- (instancetype) initWithDispatcher:(LSURLDispatcher *)dispatcher session:(NSURLSession *)session request:(NSURLRequest *)request endPoint:(NSString *)endPoint delegate:(id <LSURLDispatchDelegate>)delegate gatherData:(BOOL)gatherData isLong:(BOOL)isLong;
 
 
 #pragma mark -
@@ -42,6 +47,16 @@
 #pragma mark Access to underlying thread (for internal use only)
 
 - (LSURLDispatcherThread *) thread;
+
+
+#pragma mark -
+#pragma mark Events for NSURLSessionTask (for internal use only)
+
+- (void) taskWillSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void) taskDidReceiveResponse:(NSURLResponse *)response;
+- (void) taskDidReceiveData:(NSData *)data;
+- (void) taskDidFailWithError:(NSError *)error;
+- (void) taskDidFinishLoading;
 
 
 @end

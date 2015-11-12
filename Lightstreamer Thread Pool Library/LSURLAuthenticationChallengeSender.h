@@ -1,8 +1,8 @@
 //
-//  LSThreadPoolThread.h
+//  LSURLAuthenticationChallengeSender.h
 //  Lightstreamer Thread Pool Library
 //
-//  Created by Gianluca Bertani on 18/09/12.
+//  Created by Gianluca Bertani on 11/11/15.
 //  Copyright (c) Lightstreamer Srl
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,28 +21,18 @@
 #import <Foundation/Foundation.h>
 
 
-@class LSThreadPool;
-
 /**
- @brief A thread of an LSThreadPool. <b>This class should not be used directly</b>.
- @see LSThreadPool.
+ @brief A wrapper for the sender of an authentication challenge. <b>This class should not be used directly</b>.
+ @see LSURLDispatcher.
  */
-@interface LSThreadPoolThread : NSThread
+@interface LSURLAuthenticationChallengeSender : NSObject <NSURLAuthenticationChallengeSender>
 
 
 #pragma mark -
-#pragma mark Initialization
+#pragma mark Properties (for internal use only)
 
-- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor;
-
-- (void) dispose;
-
-
-#pragma mark -
-#pragma mark Properties
-
-@property (nonatomic, readonly) BOOL working;
-@property (nonatomic, readonly) NSTimeInterval lastActivity;
+@property (nonatomic, readonly) NSURLSessionAuthChallengeDisposition disposition;
+@property (nonatomic, readonly) NSURLCredential *credential;
 
 
 @end

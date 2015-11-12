@@ -2,7 +2,7 @@
 Thread Pool library for iOS
 ===========================
 
-The thread pool and URL dispatch library used by Lightstreamer's iOS client library since v. 1.2
+The thread pool and URL dispatch library used by Lightstreamer's iOS client library since v. 1.2.
 
 
 What this library does
@@ -138,6 +138,25 @@ dedicated to decoupling the caller from the wait of a free connection.
 Threads are recycled if another request arrives within 10 seconds. After 15 seconds
 a collector removes idle threads.
 
+Starting with **version 1.6**, `LSURLDispatcher` uses a shared `NSURLSession` and a separate `NSURLSessionDataTask` 
+for each operation, in place of an `NSURLConnection`. It reverts to `NSURLConnection` when `NSURLSession` is not
+available, i.e. for iOS < 7.0 and OS X < 10.9.
+
+The API remains exactly the same, enforcing the request limit as usual. There is just the addition of a new class 
+setter/getter to force the use of `NSURLConnection` even when `NSURLSession` is available:
+
+```objective-c
+[[LSURLDispatcher sharedDispatcher] setUseNSURLSessionIfAvailable:NO];
+```
+
+On the threading level, there is an transparent but important difference between the use of `NSURLSession` and
+`NSURLConnection`:
+
+* as stated above, with `NSURLConnection` requests are operated on custom threads of `LSURLDispatcher`, with
+their own run loop;
+* with `NSURLSession`, requests are operated on the session's own threads, but `LSURLDispatcher` threads are 
+still used for operations' delegate event delivery.
+
 
 LSTimerThread
 -------------
@@ -182,7 +201,8 @@ Test cases
 ----------
 
 A couple of simple test cases are included, which will show the strict enforcement on thread
-pool size and the strict enforcement of connection limit per end-point.
+pool size and connection limit per end-point. The test case on connection limit enforcement
+runs with once with `NSURLConnection` and once with `NSURLSession`.
 
 
 License

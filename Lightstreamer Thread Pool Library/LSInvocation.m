@@ -106,7 +106,7 @@
 	return invocation;
 }
 
-- (id) initWithBlock:(LSInvocationBlock)block {
+- (instancetype) initWithBlock:(LSInvocationBlock)block {
 	if ((self = [super init])) {
 		
 		// Initialization
@@ -121,7 +121,7 @@
 	return self;
 }
 
-- (id) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
+- (instancetype) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
 	if ((self = [super init])) {
 		
 		// Initialization

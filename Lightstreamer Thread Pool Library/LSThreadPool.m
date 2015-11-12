@@ -79,7 +79,7 @@
 	return pool;
 }
 
-- (id) initWithName:(NSString *)name size:(NSUInteger)poolSize {
+- (instancetype) initWithName:(NSString *)name size:(NSUInteger)poolSize {
 	if ((self = [super init])) {
 		
 		// Initialization

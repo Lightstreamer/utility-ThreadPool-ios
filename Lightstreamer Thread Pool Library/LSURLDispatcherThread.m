@@ -28,10 +28,11 @@
 #pragma mark LSURLDispatcherThread extension
 
 @interface LSURLDispatcherThread () {
-	NSTimeInterval _loopInterval;
+    LSURLDispatcher __weak *_dispatcher;
+
+    NSTimeInterval _loopInterval;
 	
 	NSTimeInterval _lastActivity;
-	
 	BOOL _running;
 }
 
@@ -48,10 +49,12 @@
 #pragma mark -
 #pragma mark Initialization
 
-- (id) init {
+- (instancetype) initWithDispatcher:(LSURLDispatcher *)dispatcher {
     if ((self = [super init])) {
         
         // Initialization
+        _dispatcher= dispatcher;
+
         _running= YES;
 		
 		// Use a random loop time to avoid periodic delays
@@ -71,7 +74,7 @@
     @autoreleasepool {
         NSRunLoop *runLoop= [NSRunLoop currentRunLoop];
         
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"thread %p started", self];
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread %p started", self];
 		
         do {
             @autoreleasepool {
@@ -79,13 +82,13 @@
                     [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
                     
                 } @catch (NSException *e) {
-					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"exception caught while running thread %p run loop: %@", self, e];
+					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"exception caught while running thread %p run loop: %@", self, e];
                 }
             }
             
         } while (_running);
         
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:[LSURLDispatcher sharedDispatcher] log:@"thread %p stopped", self];
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread %p stopped", self];
     }
 }
 

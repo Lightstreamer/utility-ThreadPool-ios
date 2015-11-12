@@ -48,7 +48,7 @@
  <br/> Connection threads are created on-demand and recycled up to 10 seconds after a thread has been freed. Every 15 seconds
  a collector passes and disposes of threads remained on idle since more than 10 seconds.
 */
-@interface LSURLDispatcher : NSObject
+@interface LSURLDispatcher : NSObject <NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
 
 
 #pragma mark -
@@ -83,6 +83,28 @@
  @throws NSException If the specified number is bigger than the connection pool size.
  */
 + (void) setMaxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint;
+
+/**
+ @brief Getter for the currently configured flag of use of NSURLSession.
+ <br/> If <code>YES</code> and running on iOS 7.0 or greater, or OS X 10.9 or greater, the LSURLDispatcher makes use
+ of a common NSURLSession and a separate NSURLSessionDataTask for each dispatch operation. If <code>NO</code>,
+ the LSURLDispatcher reverts to NSURLConnections even on iOS 7.0 or greater, or OS X 10.9 or greater.
+ <br/> NOTE: make sure to set this value before initialization (i.e. before the first time the singleton is accessed).
+ <br/> Default value is <code>YES</code>
+ @return The currently configured flag of use of NSURLSession.
+ */
++ (BOOL) useNSURLSessionIfAvailable;
+
+/**
+ @brief Setter for the flag of use of NSURLSession.
+ <br/> If <code>YES</code> and running on iOS 7.0 or greater, or OS X 10.9 or greater, the LSURLDispatcher makes use
+ of a common NSURLSession and a separate NSURLSessionDataTask for each dispatch operation. If <code>NO</code>,
+ the LSURLDispatcher reverts to NSURLConnections even on iOS 7.0 or greater, or OS X 10.9 or greater.
+ <br/> This value is checked only during initialization (i.e. the first time the singleton is accessed).
+ <br/> Default value is <code>YES</code>
+ @return The currently configured flag of use of NSURLSession.
+ */
++ (void) setUseNSURLSessionIfAvailable:(BOOL)use;
 
 
 #pragma mark -

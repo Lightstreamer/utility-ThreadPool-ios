@@ -22,6 +22,7 @@
 #import "LSURLDispatchOperation.h"
 #import "LSURLDispatchOperation+Internals.h"
 #import "LSURLDispatcherThread.h"
+#import "LSURLAuthenticationChallengeSender.h"
 #import "LSThreadPool.h"
 #import "LSInvocation.h"
 #import "LSTimerThread.h"
@@ -50,6 +51,10 @@
 	
 	NSCondition *_waitForFreeThread;
 	int _nextThreadId;
+    
+    // NSURLSession used only if available (iOS >= 7.0 or OS X >= 10.9)
+    NSURLSession *_session;
+    NSMutableDictionary *_operationsByTask;
 }
 
 
@@ -78,6 +83,7 @@
 
 static LSURLDispatcher *__sharedDispatcher= nil;
 static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT;
+static BOOL __useNSURLSessionIfAvailable= YES;
 
 
 #pragma mark -
@@ -106,8 +112,10 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 		return;
 	
 	@synchronized ([LSURLDispatcher class]) {
-		if (__sharedDispatcher)
+        if (__sharedDispatcher) {
+            [__sharedDispatcher dispose];
 			__sharedDispatcher= nil;
+        }
 	}
 }
 
@@ -128,15 +136,23 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 	__maxLongRunningRequestsPerEndPoint= maxLongRunningRequestsPerEndPoint;
 }
 
++ (BOOL) useNSURLSessionIfAvailable {
+    return __useNSURLSessionIfAvailable;
+}
+
++ (void) setUseNSURLSessionIfAvailable:(BOOL)use {
+    __useNSURLSessionIfAvailable= use;
+}
+
 
 #pragma mark -
 #pragma mark Initialization
 
-- (id) init {
+- (instancetype) init {
 	if ((self = [super init])) {
 		
 		// Initialization
-		_decouplingThreadPoolsByEndPoint= [[NSMutableDictionary alloc] init];;
+		_decouplingThreadPoolsByEndPoint= [[NSMutableDictionary alloc] init];
 		
 		_freeThreadsByEndPoint= [[NSMutableDictionary alloc] init];
 		_busyThreadsByEndPoint= [[NSMutableDictionary alloc] init];
@@ -145,12 +161,30 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
         
 		_waitForFreeThread= [[NSCondition alloc] init];
         _nextThreadId= 1;
+        
+        // Use NSURLSession if available (iOS >= 7.0 or OS X >= 10.9)
+        if (NSClassFromString(@"NSURLSession") && __useNSURLSessionIfAvailable) {
+            
+            // Initialize the session
+            NSURLSessionConfiguration *config= [NSURLSessionConfiguration defaultSessionConfiguration];
+            _session= [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
+            
+            // Initialize the operation-task map
+            _operationsByTask= [[NSMutableDictionary alloc] init];
+        }
 	}
 	
 	return self;
 }
 
-- (void) dealloc {
+
+#pragma mark -
+#pragma mark Finalization
+
+- (void) dispose {
+    if (_session)
+        [_session invalidateAndCancel];
+    
     [self stopThreads];
 }
 
@@ -165,7 +199,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 									 userInfo:nil];
 
 	NSString *endPoint= [self endPointForRequest:request];
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:YES isLong:NO];
+    LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:YES isLong:NO];
 
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting synchronous operation %p for end-point %@", dispatchOp, endPoint];
 
@@ -191,7 +225,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 
 	NSString *endPoint= [self endPointForRequest:request];
 	
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:NO];
+	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:NO isLong:NO];
 	
 	// Get the decoupling thread pool for this end-point
 	LSThreadPool *pool= nil;
@@ -248,7 +282,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 		[_longRequestCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:count] forKey:endPoint];
 	}
 	
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithURLRequest:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
+	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
 	
 	// Get the decoupling thread pool for this end-point
 	LSThreadPool *pool= nil;
@@ -349,7 +383,7 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 				
 				// Check if we have to wait or create a new one
 				if ([busyThreads count] < MAX(MAX_THREADS_PER_ENDPOINT, __maxLongRunningRequestsPerEndPoint)) {
-					thread= [[LSURLDispatcherThread alloc] init];
+					thread= [[LSURLDispatcherThread alloc] initWithDispatcher:self];
 					thread.name= [NSString stringWithFormat:@"LS URL Dispatcher Thread %d", _nextThreadId];
 					
 					[thread start];
@@ -423,7 +457,17 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"released thread %p for end-point: %@, pool size is now: %lu (%lu active)", thread, endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
 }
 
-- (void) operationDidFinish:(LSURLDispatchOperation *)dispatchOp {
+- (void) operation:(LSURLDispatchOperation *)dispatchOp didStartWithTask:(NSURLSessionDataTask *)task {
+    if (task && _operationsByTask) {
+        
+        // Store the operation-task association for use during the event dispatch
+        @synchronized (_operationsByTask) {
+            [_operationsByTask setObject:dispatchOp forKey:[NSNumber numberWithInteger:task.taskIdentifier]];
+        }
+    }
+}
+
+- (void) operation:(LSURLDispatchOperation *)dispatchOp didFinishWithTask:(NSURLSessionDataTask *)task {
 	if (dispatchOp.isLong) {
 		
 		// Update long running request count
@@ -443,6 +487,99 @@ static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_
 		// Release connection thread to thread pool
 		[self releaseThread:[dispatchOp thread] forEndPoint:dispatchOp.endPoint];
 	}
+    
+    if (task && _operationsByTask) {
+        
+        // Clear the operation-task association
+        @synchronized (_operationsByTask) {
+            [_operationsByTask removeObjectForKey:[NSNumber numberWithInteger:task.taskIdentifier]];
+        }
+    }
+}
+
+
+#pragma mark -
+#pragma mark methods of NSURLSessionTaskDelegate and NSURLSessionDataDelegate
+
+- (void) URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+    didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
+    completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * __nullable credential))completionHandler {
+    
+    // Retrieve corresponding dispatch operation
+    LSURLDispatchOperation *dispatchOp= nil;
+    @synchronized (_operationsByTask) {
+        dispatchOp= [_operationsByTask objectForKey:[NSNumber numberWithInteger:task.taskIdentifier]];
+        if (!dispatchOp) {
+            completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+            return;
+        }
+    }
+    
+    // Wrap the sender and call event on the operation's thread, waiting for the result
+    LSURLAuthenticationChallengeSender *sender= [[LSURLAuthenticationChallengeSender alloc] init];
+    NSURLAuthenticationChallenge *wrapperChallenge= [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:sender];
+    [dispatchOp performSelector:@selector(taskWillSendRequestForAuthenticationChallenge:) onThread:[dispatchOp thread] withObject:wrapperChallenge waitUntilDone:YES];
+    
+    // Continue the request processing
+    completionHandler(sender.disposition, sender.credential);
+}
+
+- (void) URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+    didCompleteWithError:(nullable NSError *)error {
+    
+    // Retrieve corresponding dispatch operation
+    LSURLDispatchOperation *dispatchOp= nil;
+    @synchronized (_operationsByTask) {
+        dispatchOp= [_operationsByTask objectForKey:[NSNumber numberWithInteger:task.taskIdentifier]];
+        if (!dispatchOp)
+            return;
+    }
+    
+    // Schedule event call on the operation's thread
+    if (error) {
+        NSError *errorCopy= [error copy];
+        [dispatchOp performSelector:@selector(taskDidFailWithError:) onThread:[dispatchOp thread] withObject:errorCopy waitUntilDone:NO];
+        
+    } else
+        [dispatchOp performSelector:@selector(taskDidFinishLoading) onThread:[dispatchOp thread] withObject:nil waitUntilDone:NO];
+}
+
+- (void) URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveResponse:(NSURLResponse *)response
+    completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
+    
+    // Retrieve corresponding dispatch operation
+    LSURLDispatchOperation *dispatchOp= nil;
+    @synchronized (_operationsByTask) {
+        dispatchOp= [_operationsByTask objectForKey:[NSNumber numberWithInteger:dataTask.taskIdentifier]];
+        if (!dispatchOp) {
+            completionHandler(NSURLSessionResponseCancel);
+            return;
+        }
+    }
+    
+    // Schedule event call on the operation's thread
+    NSURLResponse *responseCopy= [response copy];
+    [dispatchOp performSelector:@selector(taskDidReceiveResponse:) onThread:[dispatchOp thread] withObject:responseCopy waitUntilDone:NO];
+
+    // Continue the request processing
+    completionHandler(NSURLSessionResponseAllow);
+}
+
+- (void) URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data {
+    
+    // Retrieve corresponding dispatch operation
+    LSURLDispatchOperation *dispatchOp= nil;
+    @synchronized (_operationsByTask) {
+        dispatchOp= [_operationsByTask objectForKey:[NSNumber numberWithInteger:dataTask.taskIdentifier]];
+        if (!dispatchOp)
+            return;
+    }
+    
+    // Schedule event call on the operation's thread
+    NSData *dataCopy= [data copy];
+    [dispatchOp performSelector:@selector(taskDidReceiveData:) onThread:[dispatchOp thread] withObject:dataCopy waitUntilDone:NO];
 }
 
 

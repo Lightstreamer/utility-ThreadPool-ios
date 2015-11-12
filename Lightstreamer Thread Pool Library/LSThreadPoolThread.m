@@ -52,7 +52,7 @@
 #pragma mark -
 #pragma mark Initialization
 
-- (id) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor {
+- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor {
 	if ((self = [super init])) {
 		
 		// Initialization

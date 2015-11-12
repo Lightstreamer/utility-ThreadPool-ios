@@ -21,11 +21,19 @@
 #import <Foundation/Foundation.h>
 
 
+@class LSURLDispatcher;
+
 /**
  @brief A thread of a connection of the LSURLDispatcher. <b>This class should not be used directly</b>.
  @see LSURLDispatcher.
  */
 @interface LSURLDispatcherThread : NSThread
+
+
+#pragma mark -
+#pragma mark Initialization
+
+- (instancetype) initWithDispatcher:(LSURLDispatcher *)dispatcher;
 
 
 #pragma mark -

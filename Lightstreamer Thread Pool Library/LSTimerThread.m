@@ -97,7 +97,7 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark -
 #pragma mark Initialization
 
-- (id) init {
+- (instancetype) init {
 	if ((self = [super init])) {
 		
 		// Initialization

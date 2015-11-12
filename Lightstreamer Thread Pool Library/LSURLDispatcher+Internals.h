@@ -28,12 +28,19 @@
 
 
 #pragma mark -
+#pragma mark Finalization
+
+- (void) dispose;
+
+
+#pragma mark -
 #pragma mark Thread pool management and notifications (for internal use only)
 
 - (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint;
 - (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint;
 
-- (void) operationDidFinish:(LSURLDispatchOperation *)dispatchOp;
+- (void) operation:(LSURLDispatchOperation *)dispatchOp didStartWithTask:(NSURLSessionDataTask *)task;
+- (void) operation:(LSURLDispatchOperation *)dispatchOp didFinishWithTask:(NSURLSessionDataTask *)task;
 
 
 @end
