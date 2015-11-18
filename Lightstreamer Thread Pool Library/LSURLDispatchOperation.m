@@ -560,7 +560,7 @@
 									   code:NSURLErrorTimedOut
 								   userInfo:@{NSURLErrorFailingURLStringErrorKey: [_request.URL description],
 											  NSLocalizedDescriptionKey: @"The request timed out.",
-											  NSUnderlyingErrorKey: [NSError errorWithDomain:@"LSURLDispatcher"
+											  NSUnderlyingErrorKey: [NSError errorWithDomain:ERROR_DOMAIN
 																						code:NSURLErrorTimedOut
 																					userInfo:nil]}];
 	
