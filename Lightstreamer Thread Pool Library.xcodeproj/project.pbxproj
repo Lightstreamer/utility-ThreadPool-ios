@@ -11,6 +11,19 @@
 		8C981D9C1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C981D9A1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h */; };
 		8C981D9D1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
 		8C981D9E1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
+		8CB14B8E1C9C5E0800A6E423 /* libLSThreadPoolLibTvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB14B7C1C9C5DE600A6E423 /* libLSThreadPoolLibTvOS.a */; };
+		8CB14B941C9C5F6300A6E423 /* LSThreadPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD2169D767A0024547C /* LSThreadPool.m */; };
+		8CB14B951C9C5F6300A6E423 /* LSThreadPoolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */; };
+		8CB14B961C9C5F6300A6E423 /* LSInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD0169D767A0024547C /* LSInvocation.m */; };
+		8CB14B971C9C5F6300A6E423 /* LSURLDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD9169D767A0024547C /* LSURLDispatcher.m */; };
+		8CB14B981C9C5F6300A6E423 /* LSURLDispatcherThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */; };
+		8CB14B991C9C5F6300A6E423 /* LSURLDispatchOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */; };
+		8CB14B9A1C9C5F6300A6E423 /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
+		8CB14B9B1C9C5F6300A6E423 /* LSTimerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD6169D767A0024547C /* LSTimerThread.m */; };
+		8CB14B9C1C9C5F6300A6E423 /* LSLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C0879601B7A242100AAA3AA /* LSLog.m */; };
+		8CB14B9E1C9C5F7200A6E423 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB14B9D1C9C5F7200A6E423 /* Foundation.framework */; };
+		8CB14B9F1C9C5F8F00A6E423 /* Lightstreamer_Thread_Pool_Library_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m */; };
+		8CB14BA11C9C5FA100A6E423 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB14BA01C9C5FA100A6E423 /* Security.framework */; };
 		8CF15FA0169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
 		8CF15FB2169D70050024547C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9F169D70050024547C /* Foundation.framework */; };
 		8CF15FB5169D70050024547C /* libLSThreadPoolLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */; };
@@ -37,6 +50,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8CB14B8F1C9C5E0800A6E423 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8CF15F93169D70050024547C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8CB14B7B1C9C5DE600A6E423;
+			remoteInfo = "Lightstreamer Thread Pool Library tvOS";
+		};
 		8CF15FB3169D70050024547C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8CF15F93169D70050024547C /* Project object */;
@@ -54,6 +74,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		8CB14B7A1C9C5DE600A6E423 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8CF15F9A169D70050024547C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -77,6 +106,10 @@
 		8C66946B17394C92002ECD9C /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		8C981D9A1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLAuthenticationChallengeSender.h; sourceTree = "<group>"; };
 		8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLAuthenticationChallengeSender.m; sourceTree = "<group>"; };
+		8CB14B7C1C9C5DE600A6E423 /* libLSThreadPoolLibTvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLSThreadPoolLibTvOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CB14B891C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool Library tvOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CB14B9D1C9C5F7200A6E423 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS9.1.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		8CB14BA01C9C5FA100A6E423 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS9.1.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLSThreadPoolLib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15F9F169D70050024547C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8CF15FA3169D70050024547C /* Lightstreamer Thread Pool Library-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lightstreamer Thread Pool Library-Prefix.pch"; sourceTree = "<group>"; };
@@ -105,6 +138,23 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8CB14B791C9C5DE600A6E423 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CB14B9E1C9C5F7200A6E423 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CB14B861C9C5E0800A6E423 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CB14BA11C9C5FA100A6E423 /* Security.framework in Frameworks */,
+				8CB14B8E1C9C5E0800A6E423 /* libLSThreadPoolLibTvOS.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8CF15F99169D70050024547C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -161,6 +211,8 @@
 				8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library Tests.xctest */,
 				8CFC759E1B8370080026AE74 /* libLSThreadPoolLibOSX.a */,
 				8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests.xctest */,
+				8CB14B7C1C9C5DE600A6E423 /* libLSThreadPoolLibTvOS.a */,
+				8CB14B891C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,6 +220,8 @@
 		8CF15F9E169D70050024547C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8CB14BA01C9C5FA100A6E423 /* Security.framework */,
+				8CB14B9D1C9C5F7200A6E423 /* Foundation.framework */,
 				8CF15FE9169D83790024547C /* Security.framework */,
 				8CF15F9F169D70050024547C /* Foundation.framework */,
 			);
@@ -246,6 +300,41 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		8CB14B7B1C9C5DE600A6E423 /* Lightstreamer Thread Pool Library tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CB14B841C9C5DE600A6E423 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library tvOS" */;
+			buildPhases = (
+				8CB14B781C9C5DE600A6E423 /* Sources */,
+				8CB14B791C9C5DE600A6E423 /* Frameworks */,
+				8CB14B7A1C9C5DE600A6E423 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Lightstreamer Thread Pool Library tvOS";
+			productName = "Lightstreamer Thread Pool Library tvOS";
+			productReference = 8CB14B7C1C9C5DE600A6E423 /* libLSThreadPoolLibTvOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		8CB14B881C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CB14B911C9C5E0800A6E423 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library tvOS Tests" */;
+			buildPhases = (
+				8CB14B851C9C5E0800A6E423 /* Sources */,
+				8CB14B861C9C5E0800A6E423 /* Frameworks */,
+				8CB14B871C9C5E0800A6E423 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8CB14B901C9C5E0800A6E423 /* PBXTargetDependency */,
+			);
+			name = "Lightstreamer Thread Pool Library tvOS Tests";
+			productName = "Lightstreamer Thread Pool Library tvOS Tests";
+			productReference = 8CB14B891C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8CF15FC1169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library" */;
@@ -328,6 +417,12 @@
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Weswit srl";
 				TargetAttributes = {
+					8CB14B7B1C9C5DE600A6E423 = {
+						CreatedOnToolsVersion = 7.2.1;
+					};
+					8CB14B881C9C5E0800A6E423 = {
+						CreatedOnToolsVersion = 7.2.1;
+					};
 					8CFC759D1B8370080026AE74 = {
 						CreatedOnToolsVersion = 6.4;
 					};
@@ -352,11 +447,20 @@
 				8CF15FAC169D70050024547C /* Lightstreamer Thread Pool Library Tests */,
 				8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library OS X */,
 				8CFC75A71B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests */,
+				8CB14B7B1C9C5DE600A6E423 /* Lightstreamer Thread Pool Library tvOS */,
+				8CB14B881C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8CB14B871C9C5E0800A6E423 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8CF15FAA169D70050024547C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -404,6 +508,30 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8CB14B781C9C5DE600A6E423 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CB14B941C9C5F6300A6E423 /* LSThreadPool.m in Sources */,
+				8CB14B951C9C5F6300A6E423 /* LSThreadPoolThread.m in Sources */,
+				8CB14B961C9C5F6300A6E423 /* LSInvocation.m in Sources */,
+				8CB14B971C9C5F6300A6E423 /* LSURLDispatcher.m in Sources */,
+				8CB14B981C9C5F6300A6E423 /* LSURLDispatcherThread.m in Sources */,
+				8CB14B991C9C5F6300A6E423 /* LSURLDispatchOperation.m in Sources */,
+				8CB14B9A1C9C5F6300A6E423 /* LSURLAuthenticationChallengeSender.m in Sources */,
+				8CB14B9B1C9C5F6300A6E423 /* LSTimerThread.m in Sources */,
+				8CB14B9C1C9C5F6300A6E423 /* LSLog.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8CB14B851C9C5E0800A6E423 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CB14B9F1C9C5F8F00A6E423 /* Lightstreamer_Thread_Pool_Library_Tests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8CF15F98169D70050024547C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -455,6 +583,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8CB14B901C9C5E0800A6E423 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8CB14B7B1C9C5DE600A6E423 /* Lightstreamer Thread Pool Library tvOS */;
+			targetProxy = 8CB14B8F1C9C5E0800A6E423 /* PBXContainerItemProxy */;
+		};
 		8CF15FB4169D70050024547C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library */;
@@ -468,6 +601,125 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		8CB14B821C9C5DE600A6E423 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = LSThreadPoolLibTvOS;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		8CB14B831C9C5DE600A6E423 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = LSThreadPoolLibTvOS;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Release;
+		};
+		8CB14B921C9C5E0800A6E423 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 9.1;
+			};
+			name = Debug;
+		};
+		8CB14B931C9C5E0800A6E423 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 9.1;
+			};
+			name = Release;
+		};
 		8CF15FBF169D70050024547C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -711,6 +963,22 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8CB14B841C9C5DE600A6E423 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8CB14B821C9C5DE600A6E423 /* Debug */,
+				8CB14B831C9C5DE600A6E423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		8CB14B911C9C5E0800A6E423 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library tvOS Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8CB14B921C9C5E0800A6E423 /* Debug */,
+				8CB14B931C9C5E0800A6E423 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		8CF15F96169D70050024547C /* Build configuration list for PBXProject "Lightstreamer Thread Pool Library" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
