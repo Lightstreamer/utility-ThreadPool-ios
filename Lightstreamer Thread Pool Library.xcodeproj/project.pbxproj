@@ -360,7 +360,6 @@
 				8CF15FA8169D70050024547C /* Sources */,
 				8CF15FA9169D70050024547C /* Frameworks */,
 				8CF15FAA169D70050024547C /* Resources */,
-				8CF15FAB169D70050024547C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -478,19 +477,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8CF15FAB169D70050024547C /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-		};
 		8CFC75991B836F8A0026AE74 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -970,6 +956,7 @@
 				8CB14B831C9C5DE600A6E423 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8CB14B911C9C5E0800A6E423 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library tvOS Tests" */ = {
 			isa = XCConfigurationList;
@@ -978,6 +965,7 @@
 				8CB14B931C9C5E0800A6E423 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8CF15F96169D70050024547C /* Build configuration list for PBXProject "Lightstreamer Thread Pool Library" */ = {
 			isa = XCConfigurationList;
