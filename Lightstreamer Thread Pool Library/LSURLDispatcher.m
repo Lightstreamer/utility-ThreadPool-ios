@@ -232,7 +232,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 	@synchronized (_decouplingThreadPoolsByEndPoint) {
 		pool= [_decouplingThreadPoolsByEndPoint objectForKey:endPoint];
 		if (!pool) {
-			NSString *poolName= [NSString stringWithFormat:@"LS URL Dispatcher Decoupling Thread Pool for end-point %@", endPoint];
+			NSString *poolName= [NSString stringWithFormat:@"LSURLDispatcher Decoupling %@", endPoint];
 			pool= [[LSThreadPool alloc] initWithName:poolName size:1];
 			
 			[_decouplingThreadPoolsByEndPoint setObject:pool forKey:endPoint];
@@ -289,7 +289,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 	@synchronized (_decouplingThreadPoolsByEndPoint) {
 		pool= [_decouplingThreadPoolsByEndPoint objectForKey:endPoint];
 		if (!pool) {
-			NSString *poolName= [NSString stringWithFormat:@"LS URL Dispatcher Decoupling Thread Pool for end-point %@", endPoint];
+			NSString *poolName= [NSString stringWithFormat:@"LSURLDispatcher Decoupling %@", endPoint];
 			pool= [[LSThreadPool alloc] initWithName:poolName size:1];
 			
 			[_decouplingThreadPoolsByEndPoint setObject:pool forKey:endPoint];
@@ -384,7 +384,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 				// Check if we have to wait or create a new one
 				if ([busyThreads count] < MAX(MAX_THREADS_PER_ENDPOINT, __maxLongRunningRequestsPerEndPoint)) {
 					thread= [[LSURLDispatcherThread alloc] initWithDispatcher:self];
-					thread.name= [NSString stringWithFormat:@"LS URL Dispatcher Thread %d", _nextThreadId];
+					thread.name= [NSString stringWithFormat:@"LSURLDispatcher %@ Thread%d", endPoint, _nextThreadId];
 					
 					[thread start];
 					
@@ -410,7 +410,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 
 	} while (YES);
 	
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"preempted thread %p for end-point: %@, pool size is now: %lu (%lu active)", thread, endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"preempted thread for end-point: %@, pool size is now: %lu (%lu active)", endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
 
 	return thread;
 }
@@ -454,7 +454,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
     [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(collectIdleThreads)];
     [[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
     
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"released thread %p for end-point: %@, pool size is now: %lu (%lu active)", thread, endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
+	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"released thread for end-point: %@, pool size is now: %lu (%lu active)", endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
 }
 
 - (void) operation:(LSURLDispatchOperation *)dispatchOp didStartWithTask:(NSURLSessionDataTask *)task {

@@ -173,7 +173,7 @@
 			
 			// No free threads, create a new one
 			newThread= [[LSThreadPoolThread alloc] initWithPool:self
-														   name:[NSString stringWithFormat:@"LS Pool %@ Thread %d", _name, _nextThreadId]
+														   name:[NSString stringWithFormat:@"%@ Thread%d", _name, _nextThreadId]
 														  queue:_invocationQueue
 												   queueMonitor:_monitor];
 			

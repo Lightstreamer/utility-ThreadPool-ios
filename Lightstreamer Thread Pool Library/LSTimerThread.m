@@ -104,7 +104,7 @@ static LSTimerThread *__sharedTimer= nil;
 		_running= YES;
 		
 		_thread= [[NSThread alloc] initWithTarget:self selector:@selector(threadRunLoop) object:nil];
-		_thread.name= [NSString stringWithFormat:@"LS Timer Thread"];
+		_thread.name= [NSString stringWithFormat:@"LSTimerThread"];
 		
 		[_thread start];
 	}

@@ -29,7 +29,6 @@
 
 @interface LSThreadPoolThread () {
 	LSThreadPool * __weak _pool;
-	NSString *_name;
 	NSMutableArray * __weak _queue;
 	NSCondition * __weak _queueMonitor;
 	
@@ -57,9 +56,10 @@
 		
 		// Initialization
 		_pool= pool;
-		_name= name;
 		_queue= queue;
 		_queueMonitor= queueMonitor;
+        
+        self.name= name;
 		
 		// Use a random loop time to avoid periodic delays
 		int random= 0;
@@ -89,7 +89,7 @@
     @autoreleasepool {
 	
         // Local retain: they could be released while the thread is running
-        NSString *name= _name;
+        NSString *name= self.name;
         NSMutableArray *queue= _queue;
         NSCondition *monitor= _queueMonitor;
         

@@ -45,6 +45,11 @@ static id <LSLogDelegate> __delegate= nil;
 + (void) sourceType:(int)sourceType source:(id)source log:(NSString *)format, ... {
 	if (__enabledSourceTypes & sourceType) {
 		@synchronized ([LSLog class]) {
+
+            // Thread name
+            NSThread *thread= [NSThread currentThread];
+            NSString *threadName= ([thread.name length] > 0) ? thread.name : [NSString stringWithFormat:@"Thread %p", thread];
+            
 			@try {
 				
 				// Source name
@@ -62,14 +67,14 @@ static id <LSLogDelegate> __delegate= nil;
 				va_end(arguments);
 				
 				// Logging
-				NSString *logLine= [NSString stringWithFormat:@"<Thread %p> %@ %p: %@", [NSThread currentThread], sourceName, source, logMessage];
+				NSString *logLine= [NSString stringWithFormat:@"<%@> %@ %p: %@", threadName, sourceName, source, logMessage];
 				if (__delegate)
 					[__delegate appendLogLine:logLine];
 				else
 					NSLog(@"%@", logLine);
 
 			} @catch (NSException *e) {
-				NSLog(@"<Thread %p> Exception caught while logging with format '%@': %@, reason: '%@', user info: %@", [NSThread currentThread], format, e.name, e.reason, e.userInfo);
+				NSLog(@"<%@> Exception caught while logging with format '%@': %@, reason: '%@', user info: %@", threadName, format, e.name, e.reason, e.userInfo);
 			}
 		}
 	}
@@ -77,7 +82,12 @@ static id <LSLogDelegate> __delegate= nil;
 
 + (void) log:(NSString *)format, ... {
 	@synchronized ([LSLog class]) {
-		@try {
+        
+        // Thread name
+        NSThread *thread= [NSThread currentThread];
+        NSString *threadName= ([thread.name length] > 0) ? thread.name : [NSString stringWithFormat:@"Thread %p", thread];
+
+        @try {
 		
 			// Variable arguments formatting
 			va_list arguments;
@@ -86,14 +96,14 @@ static id <LSLogDelegate> __delegate= nil;
 			va_end(arguments);
 			
 			// Logging
-			NSString *logLine= [NSString stringWithFormat:@"<Thread %p> %@", [NSThread currentThread], logMessage];
+			NSString *logLine= [NSString stringWithFormat:@"<%@> %@", threadName, logMessage];
 			if (__delegate)
 				[__delegate appendLogLine:logLine];
 			else
 				NSLog(@"%@", logLine);
 
 		} @catch (NSException *e) {
-			NSLog(@"<Thread %p> Exception caught while logging with format '%@': %@, reason: '%@', user info: %@", [NSThread currentThread], format, e.name, e.reason, e.userInfo);
+			NSLog(@"<%@> Exception caught while logging with format '%@': %@, reason: '%@', user info: %@", threadName, format, e.name, e.reason, e.userInfo);
 		}
 	}
 }

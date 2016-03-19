@@ -74,7 +74,7 @@
     @autoreleasepool {
         NSRunLoop *runLoop= [NSRunLoop currentRunLoop];
         
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread %p started", self];
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread started", self.name];
 		
         do {
             @autoreleasepool {
@@ -82,13 +82,13 @@
                     [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
                     
                 } @catch (NSException *e) {
-					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"exception caught while running thread %p run loop: %@", self, e];
+					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"exception caught while running thread run loop: %@", self.name, e];
                 }
             }
             
         } while (_running);
         
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread %p stopped", self];
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"thread stopped", self.name];
     }
 }
 
