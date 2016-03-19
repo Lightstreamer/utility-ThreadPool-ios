@@ -112,7 +112,7 @@
 				count= _count;
 			}
 			
-			NSLog(@"Thread %p: count: %lu", [NSThread currentThread], (unsigned long) count);
+			NSLog(@"%@: count: %lu", [NSThread currentThread].name, (unsigned long) count);
 		}];
 	}
 	
@@ -137,12 +137,15 @@
 	XCTAssertTrue(_count == THREAD_POOL_TEST_COUNT, @"Not all invocations have been performed (count: %lu)", (unsigned long) _count);
 }
 
+#if !TARGET_OS_TV
+
 /**
  @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
  <br/> You can monitor the pool size and thread execution on the console. Short requests are used to download the data. Consider
  that some of the requests may genuinely time out due to network conditions, these requests are not counted to check if the test
  succeeded.
- <br/> NOTE: this test uses NSURLConnection.
+ <br/> NOTE: this test uses NSURLConnection. It is skipped on tvOS since NSURLConnection is excluded from compilation to avoid 
+ deprecation warnings.
  */ 
 - (void) testURLDispatcherWithURLConnections {
 	[LSLog disableAllSourceTypes];
@@ -180,6 +183,8 @@
 	
 	XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
 }
+
+#endif // !TARGET_OS_TV
 
 /**
  @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.

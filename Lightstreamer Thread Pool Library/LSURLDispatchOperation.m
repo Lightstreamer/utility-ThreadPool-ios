@@ -424,6 +424,8 @@
         }
         
     } else {
+        
+#if !TARGET_OS_TV
     
         [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"starting connection of operation %p for end-point: %@ on thread: %p", self, _endPoint, _thread];
         
@@ -452,6 +454,9 @@
             [_connection scheduleInRunLoop:runLoop forMode:NSDefaultRunLoopMode];
             [_connection start];
         }
+        
+#endif // !TARGET_OS_TV
+
     }
 }
 
