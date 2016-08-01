@@ -18,6 +18,8 @@
 //  limitations under the License.
 //
 
+#import "LSLog.h"
+
 
 #pragma mark -
 #pragma mark LSLog Internals category
