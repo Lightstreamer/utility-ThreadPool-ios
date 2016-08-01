@@ -178,6 +178,15 @@ of `NSObject`. E.g.,
 [[LSTimerThread sharedTimer] performSelector:@selector(timeout) onTarget:self afterDelay:timeout];
 ````
 
+If you want something more handy you can use blocks. E.g.,
+
+```objective-c
+[[LSTimerThread sharedTimer] performBlock:^() {
+    // Do something
+} afterDelay:timeout];
+```
+
+
 LSLog
 -----
 

@@ -31,13 +31,14 @@
 #pragma mark Initialization (for internal use only)
 
 + (LSInvocation *) invocationWithBlock:(LSInvocationBlock)block;
++ (LSInvocation *) invocationWithBlock:(LSInvocationBlock)block delay:(NSTimeInterval)delay;
 + (LSInvocation *) invocationWithTarget:(id)target;
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector;
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector delay:(NSTimeInterval)delay;
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument;
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay;
 
-- (instancetype) initWithBlock:(LSInvocationBlock)block;
+- (instancetype) initWithBlock:(LSInvocationBlock)block delay:(NSTimeInterval)delay;
 - (instancetype) initWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay;
 
 

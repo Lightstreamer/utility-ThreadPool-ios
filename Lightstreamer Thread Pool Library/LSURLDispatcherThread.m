@@ -59,8 +59,11 @@
 		
 		// Use a random loop time to avoid periodic delays
 		int random= 0;
-		SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
-		_loopInterval= 1.0 + ((double) (ABS(random) % 2000)) / 1000.0;
+		int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+        if (result == 0)
+            _loopInterval= 1.0 + ((double) (ABS(random) % 2000)) / 1000.0;
+        else
+            _loopInterval= 2.1;
     }
     
     return self;
@@ -79,7 +82,12 @@
         do {
             @autoreleasepool {
                 @try {
-                    [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
+                    BOOL ok= [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
+                    if (!ok) {
+                        
+                        // Should never happen, but just in case avoid CPU starvation
+                        [NSThread sleepForTimeInterval:0.1];
+                    }
                     
                 } @catch (NSException *e) {
 					[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"exception caught while running thread run loop: %@", self.name, e];

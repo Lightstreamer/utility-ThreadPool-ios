@@ -63,8 +63,11 @@
 		
 		// Use a random loop time to avoid periodic delays
 		int random= 0;
-		SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
-		_loopInterval= 0.5 + ((double) (ABS(random) % 1000)) / 1000.0;
+		int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+        if (result == 0)
+            _loopInterval= 0.5 + ((double) (ABS(random) % 1000)) / 1000.0;
+        else
+            _loopInterval= 1.3;
 		
 		_running= YES;
 		_working= YES;

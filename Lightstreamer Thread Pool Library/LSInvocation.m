@@ -51,9 +51,15 @@
 #pragma mark Initialization
 
 + (LSInvocation *) invocationWithBlock:(LSInvocationBlock)block {
-	LSInvocation *invocation= [[LSInvocation alloc] initWithBlock:block];
+    LSInvocation *invocation= [[LSInvocation alloc] initWithBlock:block delay:0.0];
 	
 	return invocation;
+}
+
++ (LSInvocation *) invocationWithBlock:(LSInvocationBlock)block delay:(NSTimeInterval)delay {
+    LSInvocation *invocation= [[LSInvocation alloc] initWithBlock:block delay:delay];
+    
+    return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target {
@@ -63,50 +69,54 @@
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector {
-	if (!selector) // Target is check in the initializer
+	if (!selector)
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Selector can't be nil"
 									 userInfo:nil];
 	
-	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:0.0];
+    // Target is checked in the LSInvocatoin initializer
+    LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:0.0];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector delay:(NSTimeInterval)delay {
-	if (!selector) // Target is check in the initializer
+	if (!selector)
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Selector can't be nil"
 									 userInfo:nil];
 
+    // Target is checked in the LSInvocatoin initializer
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:nil delay:delay];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument {
-	if (!selector) // Target is check in the initializer
+	if (!selector)
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Selector can't be nil"
 									 userInfo:nil];
 
+    // Target is checked in the LSInvocatoin initializer
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:0.0];
 	
 	return invocation;
 }
 
 + (LSInvocation *) invocationWithTarget:(id)target selector:(SEL)selector argument:(id)argument delay:(NSTimeInterval)delay {
-	if (!selector) // Target is check in the initializer
+	if (!selector)
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Selector can't be nil"
 									 userInfo:nil];
 	
+    // Target is checked in the LSInvocatoin initializer
 	LSInvocation *invocation= [[LSInvocation alloc] initWithTarget:target selector:selector argument:argument delay:delay];
 	
 	return invocation;
 }
 
-- (instancetype) initWithBlock:(LSInvocationBlock)block {
+- (instancetype) initWithBlock:(LSInvocationBlock)block delay:(NSTimeInterval)delay {
 	if ((self = [super init])) {
 		
 		// Initialization
@@ -116,6 +126,7 @@
 										 userInfo:nil];
 
 		_block= [block copy];
+        _delay= delay;
 	}
 	
 	return self;

@@ -26,6 +26,11 @@
 #define THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS              (200)
 #define THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS      (1000)
 
+#define TIMER_TEST_COUNT                                     (20)
+#define TIMER_TEST_INITIAL_DELAY                              (0.6)
+#define TIMER_TEST_INCREMENTAL_DELAY_MIN                      (0.3)
+#define TIMER_TEST_INCREMENTAL_DELAY_MAX                      (0.9)
+
 #define URL_DISPATCHER_TEST_URL                              (@"http://support.apple.com/downloads/DL1581/en_US/OSXUpdCombo10.8.2.dmg")
 #define URL_DISPATCHER_TEST_COUNT                            (20)
 #define URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES            (10000)
@@ -41,9 +46,18 @@
 	NSUInteger _count;
 	NSUInteger _failedCount;
 	NSCondition *_semaphore;
+    
+    NSDate *_timerBegin;
+    NSMutableDictionary *_timerInvocations;
 	
 	NSMutableDictionary *_downloads;
 }
+
+
+#pragma mark -
+#pragma mark Callback for timer test
+
+- (void) saveInvocationTime:(NSNumber *)number;
 
 
 @end
@@ -73,7 +87,7 @@
 	
 	// Dispose the URL dispatcher
 	[LSURLDispatcher dispose];
-
+    
     [super tearDown];
 }
 
@@ -136,6 +150,79 @@
 
 	XCTAssertTrue(_count == THREAD_POOL_TEST_COUNT, @"Not all invocations have been performed (count: %lu)", (unsigned long) _count);
 }
+
+#if !TARGET_OS_SIMULATOR
+
+/**
+ @brief This test will schedule different calls at random intervals and check they are actually executed when expected.
+ <br/> NOTE: It is skipped on iOS and tvOS since they seem to have timers with much worse resolution than OS X (even in the simulator).
+ */
+- (void) testTimer {
+    [LSLog disableAllSourceTypes];
+    [LSLog enableSourceType:LOG_SRC_TIMER];
+    
+    // Instantiate the timer and wait for the thread to start
+    [LSTimerThread sharedTimer];
+    [NSThread sleepForTimeInterval:0.1];
+    
+    _timerBegin= [NSDate date];
+    _timerInvocations= [NSMutableDictionary dictionary];
+    
+    NSTimeInterval delay= TIMER_TEST_INITIAL_DELAY;
+    NSMutableArray *expectedDelays= [NSMutableArray array];
+    
+    NSLog(@"Scheduling %d delayed invocations...", TIMER_TEST_COUNT);
+    
+    for (int i= 0; i < TIMER_TEST_COUNT; i++) {
+        [expectedDelays addObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSinceDate:_timerBegin] + delay]];
+        
+        NSNumber *number= [NSNumber numberWithInt:i];
+        switch (i % 2) {
+            case 0: {
+                [[LSTimerThread sharedTimer] performBlock:^{
+
+                    [self saveInvocationTime:number];
+                
+                } afterDelay:delay];
+                break;
+            }
+                
+            case 1: {
+                [[LSTimerThread sharedTimer] performSelector:@selector(saveInvocationTime:)
+                                                    onTarget:self
+                                                  withObject:number
+                                                  afterDelay:delay];
+                break;
+            }
+        }
+        
+        int random= 0;
+        int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+        if (result == 0)
+            delay += TIMER_TEST_INCREMENTAL_DELAY_MIN + ((double) (ABS(random) % (int)((TIMER_TEST_INCREMENTAL_DELAY_MAX - TIMER_TEST_INCREMENTAL_DELAY_MIN) * 1000.0))) / 1000.0;
+        else
+            delay += (TIMER_TEST_INCREMENTAL_DELAY_MIN + TIMER_TEST_INCREMENTAL_DELAY_MAX) / 2.0;
+    }
+    
+    // Get the last expected delay and wait for it
+    NSNumber *lastExpectedDelay= [expectedDelays lastObject];
+    NSTimeInterval wait= [lastExpectedDelay doubleValue] + TIMER_TEST_INCREMENTAL_DELAY_MIN;
+    
+    NSLog(@"Scheduled %d delayed invocations, waiting %.1f secs...", TIMER_TEST_COUNT, wait);
+    
+    [NSThread sleepForTimeInterval:wait];
+    
+    for (int i= 0; i < TIMER_TEST_COUNT; i++) {
+        NSNumber *expectedDelay= [expectedDelays objectAtIndex:i];
+
+        NSNumber *number= [NSNumber numberWithInt:i];
+        NSNumber *actualDelay= [_timerInvocations objectForKey:number];
+        
+        XCTAssertEqualWithAccuracy([expectedDelay doubleValue], [actualDelay doubleValue], 0.05);
+    }
+}
+
+#endif // !TARGET_OS_SIMULATOR
 
 #if !TARGET_OS_TV
 
@@ -228,6 +315,14 @@
         sum += [download length];
     
     XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
+}
+
+#pragma mark -
+#pragma mark Callback for timer test
+
+- (void) saveInvocationTime:(NSNumber *)number {
+    [_timerInvocations setObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSinceDate:_timerBegin]]
+                                                     forKey:number];
 }
 
 

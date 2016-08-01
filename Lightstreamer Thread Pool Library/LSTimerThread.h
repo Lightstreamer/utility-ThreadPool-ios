@@ -20,6 +20,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "LSInvocation.h"
+
 
 /**
  @brief LSTimerThread is a singleton object that provides services to perform delayed calls of methods of any target/selector, 
@@ -48,6 +50,14 @@
 
 #pragma mark -
 #pragma mark Setting and removing timers
+
+/**
+ @brief Schedules a delayed call of a block.
+ @param block The block to be executed.
+ @param delay Delay of the call, expressed as seconds.
+ @throws NSException If the block is <code>nil</code>.
+ */
+- (void) performBlock:(nonnull LSInvocationBlock)block afterDelay:(NSTimeInterval)delay;
 
 /**
  @brief Schedules a delayed call of a target and selector with an argument.

@@ -40,6 +40,8 @@
 - (void) threadPerformDelayedInvocation:(LSInvocation *)invocation;
 - (void) threadCancelPreviousDelayedPerformWithInfo:(LSInvocation *)invocation;
 
+- (void) threadPerformBlockInvocation:(LSInvocation *)invocation;
+
 
 #pragma mark -
 #pragma mark Thread run loop
@@ -120,6 +122,12 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark -
 #pragma mark Setting and removing timers
 
+- (void) performBlock:(LSInvocationBlock)block afterDelay:(NSTimeInterval)delay {
+    LSInvocation *invocation= [LSInvocation invocationWithBlock:block delay:delay];
+    
+    [self performSelector:@selector(threadPerformDelayedInvocation:) onThread:_thread withObject:invocation waitUntilDone:NO];
+}
+
 - (void) performSelector:(SEL)selector onTarget:(id)target withObject:(id)argument afterDelay:(NSTimeInterval)delay {
 	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:argument delay:delay];
 	
@@ -155,7 +163,10 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark Setting and removing timers on timer thread
 
 - (void) threadPerformDelayedInvocation:(LSInvocation *)invocation {
-	[invocation.target performSelector:invocation.selector withObject:invocation.argument afterDelay:invocation.delay];
+    if (invocation.block)
+        [self performSelector:@selector(threadPerformBlockInvocation:) withObject:invocation afterDelay:invocation.delay];
+    else
+        [invocation.target performSelector:invocation.selector withObject:invocation.argument afterDelay:invocation.delay];
 }
 
 - (void) threadCancelPreviousDelayedPerformWithInfo:(LSInvocation *)invocation {
@@ -165,6 +176,10 @@ static LSTimerThread *__sharedTimer= nil;
 	} else {
 		[NSObject cancelPreviousPerformRequestsWithTarget:invocation.target];
 	}
+}
+
+- (void) threadPerformBlockInvocation:(LSInvocation *)invocation {
+    invocation.block();
 }
 
 
@@ -183,7 +198,12 @@ static LSTimerThread *__sharedTimer= nil;
                 @try {
                     [loop addTimer:timer forMode:NSDefaultRunLoopMode];
                     
-                    [loop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:4.7]];
+                    BOOL ok= [loop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:4.7]];
+                    if (!ok) {
+                        
+                        // Should never happen, but just in case avoid CPU starvation
+                        [NSThread sleepForTimeInterval:0.1];
+                    }
                     
                     [timer invalidate];
                     
