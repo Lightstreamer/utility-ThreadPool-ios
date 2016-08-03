@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   # ―――  Spec Metadata  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
   s.name         = "LSThreadPoolLib"
-  s.version      = "1.6.3"
+  s.version      = "1.6.4"
   s.summary      = "Lightstreamer Thread Pool and URL Dispatch Library"
 
   s.description  = <<-DESC

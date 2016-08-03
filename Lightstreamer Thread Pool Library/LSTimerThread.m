@@ -114,10 +114,6 @@ static LSTimerThread *__sharedTimer= nil;
 	return self;
 }
 
-- (void) dealloc {
-	[LSTimerThread dispose];
-}
-
 
 #pragma mark -
 #pragma mark Setting and removing timers
