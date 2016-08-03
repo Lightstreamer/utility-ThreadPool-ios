@@ -76,7 +76,7 @@ static LSTimerThread *__sharedTimer= nil;
 	
 	@synchronized ([LSTimerThread class]) {
 		if (!__sharedTimer)
-			__sharedTimer= [[LSTimerThread alloc] init];
+			__sharedTimer= [[LSTimerThread alloc] initWithName:@"LSSharedTimerThread"];
 	}
 	
 	return __sharedTimer;
@@ -99,14 +99,19 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark -
 #pragma mark Initialization
 
-- (instancetype) init {
+- (instancetype) initWithName:(nonnull NSString *)name {
 	if ((self = [super init])) {
 		
 		// Initialization
-		_running= YES;
+        if (!name)
+            @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                           reason:@"Timer thread name can't be nil"
+                                         userInfo:nil];
+
+        _running= YES;
 		
 		_thread= [[NSThread alloc] initWithTarget:self selector:@selector(threadRunLoop) object:nil];
-		_thread.name= [NSString stringWithFormat:@"LSTimerThread"];
+		_thread.name= name;
 		
 		[_thread start];
 	}

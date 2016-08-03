@@ -777,7 +777,7 @@
 				DSTROOT = /tmp/Lightstreamer_Thread_Pool_Library.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLib;
 				SDKROOT = iphoneos;
@@ -793,7 +793,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLib;
 				SDKROOT = iphoneos;
@@ -813,7 +813,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -832,7 +832,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

@@ -49,6 +49,18 @@
 
 
 #pragma mark -
+#pragma mark Initialization
+
+/**
+ @brief Creates an LSTimerThread with the specified name.
+ @param name The name of the timer thread. Used during logging to diagnose problems.
+ @return The created timer thread.
+ @throws NSException If the name is <code>nil</code>.
+ */
+- (nonnull instancetype) initWithName:(nonnull NSString *)name;
+
+
+#pragma mark -
 #pragma mark Setting and removing timers
 
 /**

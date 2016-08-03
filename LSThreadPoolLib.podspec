@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   # ―――  Spec Metadata  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
   s.name         = "LSThreadPoolLib"
-  s.version      = "1.6.4"
+  s.version      = "1.6.5"
   s.summary      = "Lightstreamer Thread Pool and URL Dispatch Library"
 
   s.description  = <<-DESC
@@ -52,7 +52,7 @@ Pod::Spec.new do |s|
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 
-  s.ios.deployment_target = "5.1"
+  s.ios.deployment_target = "6.0"
   s.osx.deployment_target = "10.7"
   s.tvos.deployment_target = "9.0"
 

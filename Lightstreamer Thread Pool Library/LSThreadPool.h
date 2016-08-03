@@ -51,7 +51,7 @@
  hence in any moment there may be up to <code>poolSize</code> threads.
  @throws NSException If the name is <code>nil</code> or the pool size is 0.
  */
-- (nonnull id) initWithName:(nonnull NSString *)name size:(NSUInteger)poolSize;
+- (nonnull instancetype) initWithName:(nonnull NSString *)name size:(NSUInteger)poolSize;
 
 /**
  @brief Disposes of any active thread and makes the thread pool no more usable.
