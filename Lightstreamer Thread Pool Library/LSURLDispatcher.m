@@ -21,7 +21,6 @@
 #import "LSURLDispatcher.h"
 #import "LSURLDispatchOperation.h"
 #import "LSURLDispatchOperation+Internals.h"
-#import "LSURLDispatcherThread.h"
 #import "LSURLAuthenticationChallengeSender.h"
 #import "LSThreadPool.h"
 #import "LSInvocation.h"
@@ -29,11 +28,8 @@
 #import "LSLog.h"
 #import "LSLog+Internals.h"
 
-#define MAX_THREADS_PER_ENDPOINT                            (4)
 #define MAX_THREAD_IDLENESS                                (10.0)
 #define THREAD_COLLECTOR_DELAY                             (15.0)
-
-#define DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT      (2)
 
 #define LS_TOO_MANY_LONG_RUNNING_REQUESTS                   (@"LSTooManyLongRunningRequests")
 
@@ -44,31 +40,23 @@
 @interface LSURLDispatcher () {
 	NSMutableDictionary *_decouplingThreadPoolsByEndPoint;
 
-	NSMutableDictionary *_freeThreadsByEndPoint;
-	NSMutableDictionary *_busyThreadsByEndPoint;
-	
+	NSMutableDictionary *_connectionCountsByEndPoint;
 	NSMutableDictionary *_longRequestCountsByEndPoint;
-	
-	NSCondition *_waitForFreeThread;
-	int _nextThreadId;
     
-    // NSURLSession used only if available (iOS >= 7.0 or OS X >= 10.9)
+    NSUInteger _maxRequestsPerEndPoint;
+    NSUInteger _maxLongRunningRequestsPerEndPoint;
+    
+	NSCondition *_waitForFreeConnection;
+    
     NSURLSession *_session;
     NSMutableDictionary *_operationsByTask;
 }
 
 
 #pragma mark -
-#pragma mark Thread management
-
-- (void) collectIdleThreads;
-- (void) stopThreads;
-
-
-#pragma mark -
 #pragma mark Internal methods
 
-- (BOOL) isLongRequestAllowedToEndPoint:(NSString *)endPoint;
+- (NSUInteger) countOfRunningLongRequestsToEndPoint:(NSString *)endPoint;
 
 - (NSString *) endPointForURL:(NSURL *)url;
 - (NSString *) endPointForRequest:(NSURLRequest *)request;
@@ -82,8 +70,6 @@
 #pragma mark LSURLDispatcher statics
 
 static LSURLDispatcher *__sharedDispatcher= nil;
-static NSUInteger __maxLongRunningRequestsPerEndPoint= DEFAULT_MAX_LONG_RUNNING_REQUESTS_PER_ENDPOINT;
-static BOOL __useNSURLSessionIfAvailable= YES;
 
 
 #pragma mark -
@@ -121,57 +107,44 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 
 
 #pragma mark -
-#pragma mark Class properties
-
-+ (NSUInteger) maxLongRunningRequestsPerEndPoint {
-	return __maxLongRunningRequestsPerEndPoint;
-}
-
-+ (void) setMaxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint {
-	if (maxLongRunningRequestsPerEndPoint > MAX_THREADS_PER_ENDPOINT)
-		@throw [NSException exceptionWithName:NSInvalidArgumentException
-									   reason:@"Specified maximum number of concurrent long requests is bigger than pool size"
-									 userInfo:@{@"poolSize": [NSNumber numberWithUnsignedInteger:MAX_THREADS_PER_ENDPOINT]}];
-	
-	__maxLongRunningRequestsPerEndPoint= maxLongRunningRequestsPerEndPoint;
-}
-
-+ (BOOL) useNSURLSessionIfAvailable {
-    return __useNSURLSessionIfAvailable;
-}
-
-+ (void) setUseNSURLSessionIfAvailable:(BOOL)use {
-    __useNSURLSessionIfAvailable= use;
-}
-
-
-#pragma mark -
 #pragma mark Initialization
 
 - (instancetype) init {
+    NSURLSessionConfiguration *config= [NSURLSessionConfiguration defaultSessionConfiguration];
+    
+    return [self initWithMaxRequestsPerEndPoint:config.HTTPMaximumConnectionsPerHost
+              maxLongRunningRequestsPerEndPoint:config.HTTPMaximumConnectionsPerHost / 2];
+}
+
+- (instancetype) initWithMaxRequestsPerEndPoint:(NSUInteger)maxRequestsPerEndPoint
+                      maxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint {
 	if ((self = [super init])) {
+        
+        // Check parameters
+        if (maxLongRunningRequestsPerEndPoint > maxRequestsPerEndPoint)
+            @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                           reason:@"Parameter maxLongRunningRequestsPerEndPoint must be lower than or equal to maxRequestsPerEndPoint"
+                                         userInfo:nil];
 		
 		// Initialization
 		_decouplingThreadPoolsByEndPoint= [[NSMutableDictionary alloc] init];
 		
-		_freeThreadsByEndPoint= [[NSMutableDictionary alloc] init];
-		_busyThreadsByEndPoint= [[NSMutableDictionary alloc] init];
-
+		_connectionCountsByEndPoint= [[NSMutableDictionary alloc] init];
 		_longRequestCountsByEndPoint= [[NSMutableDictionary alloc] init];
         
-		_waitForFreeThread= [[NSCondition alloc] init];
-        _nextThreadId= 1;
+        _maxRequestsPerEndPoint= maxRequestsPerEndPoint;
+        _maxLongRunningRequestsPerEndPoint= maxLongRunningRequestsPerEndPoint;
         
-        // Use NSURLSession if available (iOS >= 7.0 or OS X >= 10.9)
-        if (NSClassFromString(@"NSURLSession") && __useNSURLSessionIfAvailable) {
-            
-            // Initialize the session
-            NSURLSessionConfiguration *config= [NSURLSessionConfiguration defaultSessionConfiguration];
-            _session= [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
-            
-            // Initialize the operation-task map
-            _operationsByTask= [[NSMutableDictionary alloc] init];
-        }
+		_waitForFreeConnection= [[NSCondition alloc] init];
+        
+        // Initialize the session
+        NSURLSessionConfiguration *config= [NSURLSessionConfiguration defaultSessionConfiguration];
+        config.HTTPMaximumConnectionsPerHost= _maxRequestsPerEndPoint;
+        
+        _session= [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
+        
+        // Initialize the operation-task map
+        _operationsByTask= [[NSMutableDictionary alloc] init];
 	}
 	
 	return self;
@@ -182,10 +155,7 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 #pragma mark Finalization
 
 - (void) dispose {
-    if (_session)
-        [_session invalidateAndCancel];
-    
-    [self stopThreads];
+    [_session invalidateAndCancel];
 }
 
 
@@ -199,6 +169,10 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 									 userInfo:nil];
 
 	NSString *endPoint= [self endPointForRequest:request];
+    
+    // Wait for a free connection
+    [self waitForFreeConnectionForEndPoint:endPoint];
+    
     LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:YES isLong:NO];
 
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting synchronous operation %p for end-point %@", dispatchOp, endPoint];
@@ -241,11 +215,13 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 	
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"scheduling short operation: %p for end-point: %@", dispatchOp, endPoint];
 	
-	// Scheduling the operation with the single-thread pool:
-	// if a free connection thread for the end-point is not free
-	// it will wait until one is freed
+	// Schedule the operation with the single-thread pool
 	[pool scheduleInvocationForBlock:^() {
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting short operation: %p for end-point: %@", dispatchOp, endPoint];
+        
+        // Wait for a free connection
+        [self waitForFreeConnectionForEndPoint:endPoint];
+
+        [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting short operation: %p for end-point: %@", dispatchOp, endPoint];
 		
 		[dispatchOp start];
 	}];
@@ -254,35 +230,57 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 }
 
 - (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate {
-	return [self dispatchLongRequest:request delegate:delegate ignoreMaxLongRunningRequestsLimit:NO];
+	return [self dispatchLongRequest:request delegate:delegate policy:LSLongRequestLimitExceededPolicyThrow];
 }
 
-- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate ignoreMaxLongRunningRequestsLimit:(BOOL)ignoreMaxLongRunningRequestsLimit {
+- (LSURLDispatchOperation *) dispatchLongRequest:(NSURLRequest *)request delegate:(id <LSURLDispatchDelegate>)delegate policy:(LSLongRequestLimitExceededPolicy)policy {
 	if ((!request) || (!delegate))
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Request and/or delegate can't be nil"
 									 userInfo:nil];
 
 	NSString *endPoint= [self endPointForRequest:request];
+    LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
 
 	// Check if there's room for another long running request
 	NSUInteger count= 0;
 	@synchronized (_longRequestCountsByEndPoint) {
 		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] unsignedIntegerValue];
-
-		if ((count >= __maxLongRunningRequestsPerEndPoint) && (!ignoreMaxLongRunningRequestsLimit))
-			@throw [NSException exceptionWithName:LS_TOO_MANY_LONG_RUNNING_REQUESTS
-										   reason:@"Maximum number of concurrent long requests reached for end-point"
-										 userInfo:@{@"endPoint": endPoint,
-													@"count": [NSNumber numberWithUnsignedInteger:count]}];
+        
+        if (count >= _maxLongRunningRequestsPerEndPoint) {
+            switch (policy) {
+                case LSLongRequestLimitExceededPolicyThrow:
+                    
+                    // Throw exception
+                    @throw [NSException exceptionWithName:LS_TOO_MANY_LONG_RUNNING_REQUESTS
+                                                   reason:@"Maximum number of concurrent long requests reached for end-point"
+                                                 userInfo:@{@"endPoint": endPoint,
+                                                            @"count": [NSNumber numberWithUnsignedInteger:count]}];
+                    
+                case LSLongRequestLimitExceededPolicyFail:
+                    [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"failing long operation: %p for end-point: %@", dispatchOp, endPoint];
+                    
+                    // Fail and return the request
+                    [dispatchOp fail];
+                    return dispatchOp;
+                    
+                case LSLongRequestLimitExceededPolicyEnqueue:
+                    
+                    // Enqueue the request as nothing was wrong
+                    break;
+                    
+                default:
+                    @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                                   reason:@"Invalid policy"
+                                                 userInfo:nil];
+            }
+        }
 
 		// Update long running request count
 		count++;
 
 		[_longRequestCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:count] forKey:endPoint];
 	}
-	
-	LSURLDispatchOperation *dispatchOp= [[LSURLDispatchOperation alloc] initWithDispatcher:self session:_session request:request endPoint:endPoint delegate:delegate gatherData:NO isLong:YES];
 	
 	// Get the decoupling thread pool for this end-point
 	LSThreadPool *pool= nil;
@@ -298,11 +296,13 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 	
 	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"scheduling long operation: %p for end-point: %@", dispatchOp, endPoint];
 	
-	// Scheduling the operation with the single-thread pool:
-	// if a free connection thread for the end-point is not free
-	// it will wait until one is freed
+	// Schedule the operation with the single-thread pool
 	[pool scheduleInvocationForBlock:^() {
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting long operation: %p for end-point: %@", dispatchOp, endPoint];
+        
+        // Wait for a free connection
+        [self waitForFreeConnectionForEndPoint:endPoint];
+
+        [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"starting long operation: %p for end-point: %@", dispatchOp, endPoint];
 		
 		[dispatchOp start];
 		
@@ -320,7 +320,8 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 
 	NSString *endPoint= [self endPointForRequest:request];
     
-    return [self isLongRequestAllowedToEndPoint:endPoint];
+    NSUInteger count= [self countOfRunningLongRequestsToEndPoint:endPoint];
+    return (count < _maxLongRunningRequestsPerEndPoint);
 }
 
 - (BOOL) isLongRequestAllowedToURL:(NSURL *)url {
@@ -331,7 +332,8 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 
 	NSString *endPoint= [self endPointForURL:url];
     
-    return [self isLongRequestAllowedToEndPoint:endPoint];
+    NSUInteger count= [self countOfRunningLongRequestsToEndPoint:endPoint];
+    return (count < _maxLongRunningRequestsPerEndPoint);
 }
 
 - (BOOL) isLongRequestAllowedToHost:(NSString *)host port:(int)port {
@@ -342,128 +344,123 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 	
 	NSString *endPoint= [self endPointForHost:host port:port];
 
-    return [self isLongRequestAllowedToEndPoint:endPoint];
+    NSUInteger count= [self countOfRunningLongRequestsToEndPoint:endPoint];
+    return (count < _maxLongRunningRequestsPerEndPoint);
+}
+
+- (NSUInteger) countOfRunningLongRequestsToURL:(nonnull NSURL *)url {
+    if (!url)
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"URL can't be nil"
+                                     userInfo:nil];
+    
+    NSString *endPoint= [self endPointForURL:url];
+    return [self countOfRunningLongRequestsToEndPoint:endPoint];
+}
+
+- (NSUInteger) countOfRunningLongRequestsToHost:(nonnull NSString *)host port:(int)port {
+    if (!host)
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"Host can't be nil"
+                                     userInfo:nil];
+    
+    NSString *endPoint= [self endPointForHost:host port:port];
+    
+    return [self countOfRunningLongRequestsToEndPoint:endPoint];
 }
 
 
 #pragma mark -
-#pragma mark Thread pool management (for use by operations)
+#pragma mark Properties
 
-- (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint {
-	LSURLDispatcherThread *thread= nil;
-	
-    NSUInteger poolSize= 0;
-    NSUInteger activeSize= 0;
+@dynamic maxRequestsPerEndPoint;
+
+- (NSUInteger) maxRequestsPerEndPoint {
+    return _maxRequestsPerEndPoint;
+}
+
+@dynamic maxLongRunningRequestsPerEndPoint;
+
+- (NSUInteger) maxLongRunningRequestsPerEndPoint {
+    return _maxLongRunningRequestsPerEndPoint;
+}
+
+- (void) setMaxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint {
+    
+    // Check parameter
+    if (maxLongRunningRequestsPerEndPoint > _maxRequestsPerEndPoint)
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"Must be lower than or equal to maxRequestsPerEndPoint"
+                                     userInfo:nil];
+    
+    _maxLongRunningRequestsPerEndPoint= maxLongRunningRequestsPerEndPoint;
+}
+
+
+#pragma mark -
+#pragma mark Operation synchronization (for internal use only)
+
+- (void) waitForFreeConnectionForEndPoint:(NSString *)endPoint {
+    NSUInteger connectionCount= 0;
+    
 	do {
-		@synchronized (_freeThreadsByEndPoint) {
+		@synchronized (_connectionCountsByEndPoint) {
 			
-			// Retrieve data structures
-			NSMutableArray *freeThreads= [_freeThreadsByEndPoint objectForKey:endPoint];
-			if (!freeThreads) {
-				freeThreads= [[NSMutableArray alloc] init];
-
-				[_freeThreadsByEndPoint setObject:freeThreads forKey:endPoint];
-			}
-			
-			NSMutableArray *busyThreads= [_busyThreadsByEndPoint objectForKey:endPoint];
-			if (!busyThreads) {
-				busyThreads= [[NSMutableArray alloc] init];
+			// Retrieve current connection count
+            NSNumber *connectionCountNumber= [_connectionCountsByEndPoint objectForKey:endPoint];
+            connectionCount= [connectionCountNumber unsignedIntegerValue];
 				
-				[_busyThreadsByEndPoint setObject:busyThreads forKey:endPoint];
-			}
-			
-			// Get first free worker thread
-			if ([freeThreads count] > 0) {
-				thread= (LSURLDispatcherThread *) [freeThreads objectAtIndex:0];
-
-				[freeThreads removeObjectAtIndex:0];
-			}
-			
-			if (!thread) {
-				
-				// Check if we have to wait or create a new one
-				if ([busyThreads count] < MAX(MAX_THREADS_PER_ENDPOINT, __maxLongRunningRequestsPerEndPoint)) {
-					thread= [[LSURLDispatcherThread alloc] initWithDispatcher:self];
-					thread.name= [NSString stringWithFormat:@"LSURLDispatcher %@ Thread%d", endPoint, _nextThreadId];
-					
-					[thread start];
-					
-					_nextThreadId++;
-				}
-			}
-
-			if (thread) {
-				[busyThreads addObject:thread];
-			
-				activeSize= [busyThreads count];
-				poolSize= activeSize + [freeThreads count];
-				break;
-			}
+            // Check if we have to wait
+            if (connectionCount < _maxRequestsPerEndPoint) {
+                connectionCount++;
+                
+                [_connectionCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:connectionCount] forKey:endPoint];
+                break;
+            }
 		}
 		
-		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"waiting for a free thread"];
+		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"waiting for a free connection for end-point: %@...", endPoint];
 
-		// If we've got here, we have to wait for a free thread and retry
-		[_waitForFreeThread lock];
-		[_waitForFreeThread wait];
-		[_waitForFreeThread unlock];
+		// If we've got here, we have to wait for a free connection and retry
+		[_waitForFreeConnection lock];
+		[_waitForFreeConnection wait];
+		[_waitForFreeConnection unlock];
 
 	} while (YES);
-	
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"preempted thread for end-point: %@, pool size is now: %lu (%lu active)", endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
-
-	return thread;
+    
+    [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"obtained a free connection for end-point: %@, connection count is now: %lu (max %lu)", endPoint, (unsigned long) connectionCount, (unsigned long) _maxRequestsPerEndPoint];
 }
 
-- (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint {
-    NSUInteger poolSize= 0;
-    NSUInteger activeSize= 0;
-	@synchronized (_freeThreadsByEndPoint) {
-
-		// Retrieve data structures
-		NSMutableArray *freeThreads= [_freeThreadsByEndPoint objectForKey:endPoint];
-		if (!freeThreads) {
-			freeThreads= [[NSMutableArray alloc] init];
-			
-			[_freeThreadsByEndPoint setObject:freeThreads forKey:endPoint];
-		}
-		
-		NSMutableArray *busyThreads= [_busyThreadsByEndPoint objectForKey:endPoint];
-		if (!busyThreads) {
-			busyThreads= [[NSMutableArray alloc] init];
-			
-			[_busyThreadsByEndPoint setObject:busyThreads forKey:endPoint];
-		}
-
-		// Release the thread
-		[freeThreads addObject:thread];
-		[busyThreads removeObject:thread];
-        
-        thread.lastActivity= [[NSDate date] timeIntervalSinceReferenceDate];
-        
-        activeSize= [busyThreads count];
-        poolSize= activeSize + [freeThreads count];
-	}
-	
-	// Signal there's a free thread
-	[_waitForFreeThread lock];
-	[_waitForFreeThread signal];
-	[_waitForFreeThread unlock];
+- (void) connectionDidFreeForEndPoint:(NSString *)endPoint {
+    NSUInteger connectionCount= 0;
     
-	// Reschedule idle thread collector
-    [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(collectIdleThreads)];
-    [[LSTimerThread sharedTimer] performSelector:@selector(collectIdleThreads) onTarget:self afterDelay:THREAD_COLLECTOR_DELAY];
+	@synchronized (_connectionCountsByEndPoint) {
+        
+        // Retrieve current connection count
+        NSNumber *connectionCountNumber= [_connectionCountsByEndPoint objectForKey:endPoint];
+        connectionCount= [connectionCountNumber unsignedIntegerValue];
+        
+        connectionCount--;
+        [_connectionCountsByEndPoint setObject:[NSNumber numberWithUnsignedInteger:connectionCount] forKey:endPoint];
+    }
     
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"released thread for end-point: %@, pool size is now: %lu (%lu active)", endPoint, (unsigned long) poolSize, (unsigned long) activeSize];
+	// Signal there's a free connection
+	[_waitForFreeConnection lock];
+	[_waitForFreeConnection signal];
+	[_waitForFreeConnection unlock];
+    
+    [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"freed a connection for end-point: %@, connection count is now: %lu (max %lu)", endPoint, (unsigned long) connectionCount, (unsigned long) _maxRequestsPerEndPoint];
 }
+
+
+#pragma mark -
+#pragma mark Operation notifications (for internal use only)
 
 - (void) operation:(LSURLDispatchOperation *)dispatchOp didStartWithTask:(NSURLSessionDataTask *)task {
-    if (task && _operationsByTask) {
-        
-        // Store the operation-task association for use during the event dispatch
-        @synchronized (_operationsByTask) {
-            [_operationsByTask setObject:dispatchOp forKey:[NSNumber numberWithInteger:task.taskIdentifier]];
-        }
+    
+    // Store the operation-task association for use during the event dispatch
+    @synchronized (_operationsByTask) {
+        [_operationsByTask setObject:dispatchOp forKey:[NSNumber numberWithInteger:task.taskIdentifier]];
     }
 }
 
@@ -481,19 +478,13 @@ static BOOL __useNSURLSessionIfAvailable= YES;
 		
 		[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"long running request count: %lu", (unsigned long) count];
 	}
-	
-	if ([dispatchOp thread]) {
-		
-		// Release connection thread to thread pool
-		[self releaseThread:[dispatchOp thread] forEndPoint:dispatchOp.endPoint];
-	}
+
+    // Mark the connection as free
+    [self connectionDidFreeForEndPoint:dispatchOp.endPoint];
     
-    if (task && _operationsByTask) {
-        
-        // Clear the operation-task association
-        @synchronized (_operationsByTask) {
-            [_operationsByTask removeObjectForKey:[NSNumber numberWithInteger:task.taskIdentifier]];
-        }
+    // Clear the operation-task association
+    @synchronized (_operationsByTask) {
+        [_operationsByTask removeObjectForKey:[NSNumber numberWithInteger:task.taskIdentifier]];
     }
 }
 
@@ -515,10 +506,10 @@ static BOOL __useNSURLSessionIfAvailable= YES;
         }
     }
     
-    // Wrap the sender and call event on the operation's thread, waiting for the result
+    // Wrap the sender and call event on the operation
     LSURLAuthenticationChallengeSender *sender= [[LSURLAuthenticationChallengeSender alloc] init];
     NSURLAuthenticationChallenge *wrapperChallenge= [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:sender];
-    [dispatchOp performSelector:@selector(taskWillSendRequestForAuthenticationChallenge:) onThread:[dispatchOp thread] withObject:wrapperChallenge waitUntilDone:YES];
+    [dispatchOp taskWillSendRequestForAuthenticationChallenge:wrapperChallenge];
     
     // Continue the request processing
     completionHandler(sender.disposition, sender.credential);
@@ -535,13 +526,11 @@ static BOOL __useNSURLSessionIfAvailable= YES;
             return;
     }
     
-    // Schedule event call on the operation's thread
-    if (error) {
-        NSError *errorCopy= [error copy];
-        [dispatchOp performSelector:@selector(taskDidFailWithError:) onThread:[dispatchOp thread] withObject:errorCopy waitUntilDone:NO];
-        
-    } else
-        [dispatchOp performSelector:@selector(taskDidFinishLoading) onThread:[dispatchOp thread] withObject:nil waitUntilDone:NO];
+    // Call corresponding event on the operation
+    if (error)
+        [dispatchOp taskDidFailWithError:error];
+    else
+        [dispatchOp taskDidFinishLoading];
 }
 
 - (void) URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask
@@ -558,9 +547,8 @@ static BOOL __useNSURLSessionIfAvailable= YES;
         }
     }
     
-    // Schedule event call on the operation's thread
-    NSURLResponse *responseCopy= [response copy];
-    [dispatchOp performSelector:@selector(taskDidReceiveResponse:) onThread:[dispatchOp thread] withObject:responseCopy waitUntilDone:NO];
+    // Call event on the operation
+    [dispatchOp taskDidReceiveResponse:response];
 
     // Continue the request processing
     completionHandler(NSURLSessionResponseAllow);
@@ -577,70 +565,22 @@ static BOOL __useNSURLSessionIfAvailable= YES;
             return;
     }
     
-    // Schedule event call on the operation's thread
-    NSData *dataCopy= [data copy];
-    [dispatchOp performSelector:@selector(taskDidReceiveData:) onThread:[dispatchOp thread] withObject:dataCopy waitUntilDone:NO];
-}
-
-
-#pragma mark -
-#pragma mark Thread management
-
-- (void) collectIdleThreads {
-	@synchronized (_freeThreadsByEndPoint) {
-        NSTimeInterval now= [[NSDate date] timeIntervalSinceReferenceDate];
-        
-        for (NSString *endPoint in [_freeThreadsByEndPoint allKeys]) {
-            NSMutableArray *freeThreads= [_freeThreadsByEndPoint objectForKey:endPoint];
-
-            NSMutableArray *toBeCollected= [[NSMutableArray alloc] init];
-            for (LSURLDispatcherThread *thread in freeThreads) {
-                if ((now - thread.lastActivity) > MAX_THREAD_IDLENESS) {
-                    [thread stopThread];
-                    
-                    [toBeCollected addObject:thread];
-                }
-            }
-        
-            [freeThreads removeObjectsInArray:toBeCollected];
-        }
-    }
-
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"collected threads for all end-points"];
-}
-
-- (void) stopThreads {
-	@synchronized (_freeThreadsByEndPoint) {
-        for (NSMutableArray *freeThreads in [_freeThreadsByEndPoint allValues]) {
-            for (LSURLDispatcherThread *thread in freeThreads)
-                [thread stopThread];
-        
-            [freeThreads removeAllObjects];
-        }
-        
-        for (NSMutableArray *busyThreads in [_busyThreadsByEndPoint allValues]) {
-            for (LSURLDispatcherThread *thread in busyThreads)
-                [thread stopThread];
-        
-            [busyThreads removeAllObjects];
-        }
-	}
-    
-	[LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self log:@"stopped all threads, pools are now empty"];
+    // Call event on the operation
+    [dispatchOp taskDidReceiveData:data];
 }
 
 
 #pragma mark -
 #pragma mark Internal methods
 
-- (BOOL) isLongRequestAllowedToEndPoint:(NSString *)endPoint {
-	NSUInteger count= 0;
+- (NSUInteger) countOfRunningLongRequestsToEndPoint:(NSString *)endPoint {
+    NSUInteger count= 0;
     
-	@synchronized (_longRequestCountsByEndPoint) {
-		count= [[_longRequestCountsByEndPoint objectForKey:endPoint] unsignedIntegerValue];
-	}
-	
-	return (count < __maxLongRunningRequestsPerEndPoint);
+    @synchronized (_longRequestCountsByEndPoint) {
+        count= [[_longRequestCountsByEndPoint objectForKey:endPoint] unsignedIntegerValue];
+    }
+    
+    return count;
 }
 
 - (NSString *) endPointForURL:(NSURL *)url {

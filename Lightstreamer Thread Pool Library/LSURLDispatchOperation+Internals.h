@@ -41,12 +41,7 @@
 
 - (void) start;
 - (void) startAndWaitForCompletion;
-
-
-#pragma mark -
-#pragma mark Access to underlying thread (for internal use only)
-
-- (LSURLDispatcherThread *) thread;
+- (void) fail;
 
 
 #pragma mark -

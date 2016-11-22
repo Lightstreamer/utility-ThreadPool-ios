@@ -113,7 +113,10 @@
 			
 			// Sleep up to 1.0 secs
 			int random= 0;
-			SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+			int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+            if (result != 0)
+                NSLog(@"%@: could net get a random number", [NSThread currentThread].name);
+            
 			NSTimeInterval delay= ((double) (ABS(random) % THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS)) / 1000.0;
 			
 			[NSThread sleepForTimeInterval:delay];
@@ -155,7 +158,7 @@
 
 /**
  @brief This test will schedule different calls at random intervals and check they are actually executed when expected.
- <br/> NOTE: It is skipped on iOS and tvOS since they seem to have timers with much worse resolution than OS X (even in the simulator).
+ <br/> NOTE: It is skipped on iOS and tvOS since they seem to have timers with much worse resolution than macOS (even in the simulator).
  */
 - (void) testTimer {
     [LSLog disableAllSourceTypes];
@@ -224,63 +227,13 @@
 
 #endif // !TARGET_OS_SIMULATOR
 
-#if !TARGET_OS_TV
-
 /**
  @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
  <br/> You can monitor the pool size and thread execution on the console. Short requests are used to download the data. Consider
- that some of the requests may genuinely time out due to network conditions, these requests are not counted to check if the test
+ that some of the requests may genuinely timeout due to network conditions, these requests are not counted to check if the test
  succeeded.
- <br/> NOTE: this test uses NSURLConnection. It is skipped on tvOS since NSURLConnection is excluded from compilation to avoid 
- deprecation warnings.
- */ 
-- (void) testURLDispatcherWithURLConnections {
-	[LSLog disableAllSourceTypes];
-	[LSLog enableSourceType:LOG_SRC_URL_DISPATCHER];
-	
-	_count= 0;
-	_failedCount= 0;
-	
-	_downloads= [[NSMutableDictionary alloc] init];
-	
-	_semaphore= [[NSCondition alloc] init];
-	[_semaphore lock];
-    
-    // Avoid using NSURLSession
-    [LSURLDispatcher setUseNSURLSessionIfAvailable:NO];
-
-    // Use a download long enough, e.g. a Lightstreamer distribution
-	NSURL *url= [NSURL URLWithString:URL_DISPATCHER_TEST_URL];
-	NSMutableURLRequest *req= [NSMutableURLRequest requestWithURL:url];
-	[req setTimeoutInterval:URL_DISPATCHER_TEST_TIMEOUT];
-
-	for (int i= 0; i < URL_DISPATCHER_TEST_COUNT; i++)
-		[[LSURLDispatcher sharedDispatcher] dispatchShortRequest:req delegate:self];
-	
-	NSLog(@"TestThreadPool: operations dispatched, waiting...");
-	
-	[_semaphore wait];
-	[_semaphore unlock];
-	
-	_semaphore= nil;
-	
-	NSUInteger sum= 0;
-	for (NSMutableData *download in [_downloads allValues])
-		sum += [download length];
-	
-	XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
-}
-
-#endif // !TARGET_OS_TV
-
-/**
- @brief This test will run many concurrent downloads of the same file. Each download will terminate after 10 KB has been received.
- <br/> You can monitor the pool size and thread execution on the console. Short requests are used to download the data. Consider
- that some of the requests may genuinely time out due to network conditions, these requests are not counted to check if the test
- succeeded.
- <br/> NOTE: this test uses NSURLSession if available (supposedly yes).
  */
-- (void) testURLDispatcherWithURLSession {
+- (void) testURLDispatcher {
     [LSLog disableAllSourceTypes];
     [LSLog enableSourceType:LOG_SRC_URL_DISPATCHER];
     
@@ -292,10 +245,7 @@
     _semaphore= [[NSCondition alloc] init];
     [_semaphore lock];
     
-    // Avoid using NSURLSession
-    [LSURLDispatcher setUseNSURLSessionIfAvailable:YES];
-    
-    // Use a download long enough, e.g. a Lightstreamer distribution
+    // Use a download long enough
     NSURL *url= [NSURL URLWithString:URL_DISPATCHER_TEST_URL];
     NSMutableURLRequest *req= [NSMutableURLRequest requestWithURL:url];
     [req setTimeoutInterval:URL_DISPATCHER_TEST_TIMEOUT];

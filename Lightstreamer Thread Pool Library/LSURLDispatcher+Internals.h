@@ -34,10 +34,13 @@
 
 
 #pragma mark -
-#pragma mark Thread pool management and notifications (for internal use only)
+#pragma mark Operation synchronization (for internal use only)
 
-- (LSURLDispatcherThread *) preemptThreadForEndPoint:(NSString *)endPoint;
-- (void) releaseThread:(LSURLDispatcherThread *)thread forEndPoint:(NSString *)endPoint;
+- (void) connectionDidFreeForEndPoint:(NSString *)endPoint;
+
+
+#pragma mark -
+#pragma mark Operation notifications (for internal use only)
 
 - (void) operation:(LSURLDispatchOperation *)dispatchOp didStartWithTask:(NSURLSessionDataTask *)task;
 - (void) operation:(LSURLDispatchOperation *)dispatchOp didFinishWithTask:(NSURLSessionDataTask *)task;

@@ -24,7 +24,7 @@
 
 
 /**
- @brief LSTimerThread is a singleton object that provides services to perform delayed calls of methods of any target/selector, 
+ @brief LSTimerThread is a singleton object that provides services to perform delayed calls of any target/selector
  without requiring a run loop on the main thread.
  <br/> A specific thread is started and shared, with an appropriate run loop, to make the delayed calls.
  */

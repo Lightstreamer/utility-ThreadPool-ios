@@ -2,39 +2,102 @@
 Thread Pool library for iOS
 ===========================
 
-The thread pool and URL dispatch library used by Lightstreamer's iOS client library since v. 1.2.
+The thread pool and URL dispatch library used by Lightstreamer's iOS client library since version 1.2.
 
 
 What this library does
 ----------------------
 
-This code was written to address a specific problem of iOS SDK and runtime:
+This code was originally written in 2012 to address a specific problem of the iOS SDK and runtime:
 
-* iOS runtime has a limit of 4 concurrent NSURLConnections to the same end-point; above
-  this limit, connections will time out after some time without even trying.
+* `NSURLConnection` on iOS had a limit of 4 concurrent connections to the same end-point. 
+  Above this limit, connections would simply timeout without even trying.
 
-The library uses thread pools to keep the number of concurrent connections under control
-for each end-point, ensuring that a fifth (or subsequent) connection is enqueued by the 
-thread pool and not submitted to the system. The library also offers methods to know in 
-advance when a connection is going to succeed or time out for a given end-point. Last but
-not least, the library enforces the timeout set in the URL request.
+In the meantime, the `NSURLConnection` API has been replaced with the more configurable `NSURLSession`,
+but the problem is still there: a default `NSURLSession` on iOS has 4 as its maximum connections per host,
+and a request in excess will stil timeout. In theory, you could raise the `HTTPMaximumConnectionsPerHost` parameter,
+but official documentation states:
 
-For more information on this topic, please read the related article on Lightstreamer's blog:
+> Additionally, depending on your connection to the Internet, a session may use a lower limit than the one you specify.
 
-* http://blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html
+This library solves the problem by keeping the number of submitted URL requests under control
+for each end-point, ensuring that a request in excess is enqueued and not sent through the system.
+The library also offers methods to know in advance when a request is going to succeed or put on wait.
+Last but not least, the library enforces the timeout set in the URL request.
 
-What is included:
+The original article that described the problem in available on Lightstreamer's blog:
 
-* an `LSThreadPool` class that lets you execute invocations on a fixed thread pool, and
+* [blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html](http://blog.lightstreamer.com/2013/01/on-ios-url-connection-parallelism-and.html)
 
-* an `LSURLDispatcher` class that uses a thread pool to keep the number of concurrent
-  connections by end-point under control.
+What is included in this library:
+
+* `LSURLDispatcher`: a singleton class to keep the number of concurrent connections under control.
+
+* `LSThreadPool`: a fixed thread pool implementation with thread recycling and collection.
+
+* `LSTimerThread`: bonus class to run timed invocations without using the main thread.
+
+* `LSLog`: simple logging facility used internally by previous classes.
   
-* a bonus `LSTimerThread` class that lets you run timed invocation without using the
-  main thread.
 
-* a simple logging facility `LSLog` used internally by other classes.
-  
+LSURLDispatcher
+---------------
+
+The `LSURLDispatcher` is a singleton and is able to automatically initialize itself. Use it to
+start an URL request toward and end-point in one of 3 possible ways:
+
+* **Synschronous request**: in this case, the dispatcher will download the request URL
+and deliver it as a NSData. If the end-point is already at its connection limit,
+the caller will wait until a connection is freed.
+
+* **Short request**: the dispatcher will asynchronously connect and send events to your
+delegate as the connection proceeds. If the end-point is already at its connection limit,
+the dispatcher will wait in the background until a connection is freed. Use short requests
+for short-lived operations that are expected to last a few seconds only.
+
+* **Long request**: the dispatcher will asynchronously connect only if the end-point is below 
+a specific limit (lower than the connection limit), otherwise it will react according to a specified
+policy (by default it will throw an exception, but other policies are available). Use long requests for 
+long-lived operations expected to last for minutes or more (data streaming, audio/video streaming, VoIP, etc.).
+
+The distinction between **short- and long-lived requests** is important: an app that opens 4 long-lived
+requests to the same end-point, such as audio, video and data streams, has no way to contact the same end-point 
+again until one of the requests is terminated, even for simple requests like downloading an icon. By keeping
+short- and long-lived requests separated and with different limits, the library ensures that short-lived requests
+have always some spare connections to use. The Lightstreamer client takes advantage of this distinction by running 
+stream connections as long-lived requests and control connections as short-lived requests.
+
+To start a short-lived request simply do:
+
+```objective-c
+NSURL *url= [NSURL URLWithString:@"http://some/url"];
+NSURLRequest *req= [NSURLRequest requestWithURL:url];
+
+LSURLDispatchOperation *op= [[LSURLDispatcher sharedDispatcher] dispatchShortRequest:req delegate:self];
+```
+
+A request operation may be canceled at a later time, if necessary:
+
+```objective-c
+[op cancel];
+```
+
+With long-lived requests you can also check in advance if it is going to succeed
+or not (that is, if the limit has been reached or not):
+
+```objective-c
+if (![[LSURLDispatcher sharedDispatcher] isLongRequestAllowed:req]) {
+NSLog(@"Connection limit reached");
+
+} else {
+LSURLDispatchOperation *longOp= [[LSURLDispatcher sharedDispatcher] dispatchLongRequest:req delegate:self];
+// ...
+}
+```
+
+Starting with **version 1.7.0** request operations are executed on `NSURLSession` threads. The library now uses 
+its own thread pools only to enqueue requests in excess and decoupling the delivery of delegate events.
+
 
 LSThreadPool
 ------------
@@ -73,97 +136,6 @@ Threads are recycled if another scheduled call arrives within 10 seconds. After 
 a collector removes idle threads.
 
 
-LSURLDispatcher
----------------
-
-The `LSURLDispatcher` is a singleton and is able to automatically initialize itself. Use it to
-start a connection request toward a NSURLRequest in one of three possible ways:
-
-* as a **synschronous request**: in this case, the dispatcher will download the request URL
-  and deliver it as a NSData; if the end-point is already at its connection limit,
-  the caller will wait until a connection is freed;
-
-* as a **short request**: the dispatcher will asynchronously connect and send events to your
-  delegate as the connection proceeds; if the end-point is already at its connection limit,
-  the dispatcher will wait in the background until a connection is freed; use short requests
-  for short-lived operations that are expected to last a few seconds only;
-
-* as a **long request**: the dispatcher will asynchronously connect only if the end-point is below 
-  a configured limit (by default lower than the connection limit), otherwise, it will raise an exception; 
-  use long requests for long-lived operations exepected to last for minutes or more (data streaming, 
-  audio/video streaming, VoIP, etc.).
-  
-The distinction between **short- and long-lived requests** is important: an app that should open 4 long-lived
-requests to the same end-point, such as audio, video and data streams, would have no way to contact the same end-point 
-again until one of the requests is terminated, even for simple requests like downloading an icon. By keeping 
-short- and long-lived requests separated and with different limits, the library ensures that short-lived requests
-have always some spare connections to use.
-
-To start a short-lived request simply do:
-
-```objective-c
-NSURL *url= [NSURL URLWithString:@"http://some/url"];
-NSURLRequest *req= [NSURLRequest requestWithURL:url];
-
-LSURLDispatchOperation *op= [[LSURLDispatcher sharedDispatcher] dispatchShortRequest:req delegate:self];
-```
-
-A request operation may be canceled at a later time, if necessary:
-
-```objective-c
-[op cancel];
-```
-
-With long operations you can also check in advance if a it is going to succeed
-or not (that is, to know if the limit has been reached or not):
-
-```objective-c
-[[LSURLDispatcher sharedDispatcher] setMaxLongRunningRequestsPerEndPoint:2];
-
-// ...
-
-if (![[LSURLDispatcher sharedDispatcher] isLongRequestAllowed:req]) {
-    NSLog(@"Connection limit reached");
-
-} else {
-    LSURLDispatchOperation *longOp= [[LSURLDispatcher sharedDispatcher] dispatchLongRequest:req delegate:self];
-    // ...
-}
-```
-
-All requests are operated on separate threads. Each end-point has its own pool of 4 connection
-threads. In addition, for short and long requests each end-point has a general-purpose thread
-dedicated to decoupling the caller from the wait of a free connection.
-
-Threads are recycled if another request arrives within 10 seconds. After 15 seconds
-a collector removes idle threads.
-
-Starting with **version 1.6.0**, `LSURLDispatcher` uses a shared `NSURLSession` and a separate `NSURLSessionDataTask` 
-for each operation, in place of an `NSURLConnection`. It reverts to `NSURLConnection` when `NSURLSession` is not
-available, i.e. for iOS < 7.0 and OS X < 10.9.
-
-The API remains exactly the same, enforcing the request limit as usual. There is just the addition of a new class 
-setter/getter to force the use of `NSURLConnection` even when `NSURLSession` is available:
-
-```objective-c
-[[LSURLDispatcher sharedDispatcher] setUseNSURLSessionIfAvailable:NO];
-```
-
-On the threading level, there is an transparent but important difference between the use of `NSURLSession` and
-`NSURLConnection`:
-
-* as stated above, with `NSURLConnection` requests are operated on custom threads of `LSURLDispatcher`, with
-their own run loop;
-* with `NSURLSession`, requests are operated on the session's own threads, but `LSURLDispatcher` threads are 
-still used for operations' delegate event delivery.
-
-Also starting with version 1.6.0, the `LSURLDispatcher` may be safely used as a common instanced object, and not
-as a singleton, but beware: since the end-point request limit is enforced at the instance level, using multiple
-instances of `LSURLDispatcher` to access the same end-point will make the enforcement ineffective, and you could get 
-fake timeouts as if you were not using the `LSURLDispatcher` at all. Since the connection limit is system-wide, 
-the countermeasure, to be effective, *must* used as a singleton.
-
-
 LSTimerThread
 -------------
 
@@ -190,7 +162,7 @@ If you want something more handy you can use blocks. E.g.,
 LSLog
 -----
 
-The `LSLog` provides simple logging for separable sources. No logging levels are supported, but a logging 
+The `LSLog` provides simple logging for separable sources. No logging levels are supported, but a logging
 delegation is provided through the `LSLogDelegate` protocol.
 
 Supported sources are:
@@ -215,9 +187,8 @@ To enable delegation just set your `LSLogDelegate` implemenation on the `LSLog` 
 Test cases
 ----------
 
-A couple of simple test cases are included, which will show the strict enforcement on thread
-pool size and connection limit per end-point. The test case on connection limit enforcement
-runs with once with `NSURLConnection` and once with `NSURLSession`.
+A few simple test cases are included. They show the strict enforcement on thread pool size,
+the timed invocations and the connection limit per end-point.
 
 
 License

@@ -26,6 +26,7 @@
  @brief The LSLogDelegate protocol can be used to redirect the simple logging
  system to a different destination, such as a file or an application-wide
  logging system.
+ @see LSLog.
  */
 @protocol LSLogDelegate <NSObject>
 

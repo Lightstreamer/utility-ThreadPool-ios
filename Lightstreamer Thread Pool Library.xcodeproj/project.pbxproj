@@ -16,7 +16,6 @@
 		8CB14B951C9C5F6300A6E423 /* LSThreadPoolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */; };
 		8CB14B961C9C5F6300A6E423 /* LSInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD0169D767A0024547C /* LSInvocation.m */; };
 		8CB14B971C9C5F6300A6E423 /* LSURLDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD9169D767A0024547C /* LSURLDispatcher.m */; };
-		8CB14B981C9C5F6300A6E423 /* LSURLDispatcherThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */; };
 		8CB14B991C9C5F6300A6E423 /* LSURLDispatchOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */; };
 		8CB14B9A1C9C5F6300A6E423 /* LSURLAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C981D9B1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m */; };
 		8CB14B9B1C9C5F6300A6E423 /* LSTimerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD6169D767A0024547C /* LSTimerThread.m */; };
@@ -33,7 +32,6 @@
 		8CF15FE0169D767A0024547C /* LSThreadPoolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */; };
 		8CF15FE1169D767A0024547C /* LSTimerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD6169D767A0024547C /* LSTimerThread.m */; };
 		8CF15FE2169D767A0024547C /* LSURLDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD9169D767A0024547C /* LSURLDispatcher.m */; };
-		8CF15FE3169D767A0024547C /* LSURLDispatcherThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */; };
 		8CF15FE4169D767A0024547C /* LSURLDispatchOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */; };
 		8CF15FEA169D83790024547C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CF15FE9169D83790024547C /* Security.framework */; };
 		8CFC75A91B8370080026AE74 /* libLSThreadPoolLibOSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CFC759E1B8370080026AE74 /* libLSThreadPoolLibOSX.a */; };
@@ -43,7 +41,6 @@
 		8CFC75B81B83737D0026AE74 /* LSThreadPoolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD4169D767A0024547C /* LSThreadPoolThread.m */; };
 		8CFC75B91B83737D0026AE74 /* LSInvocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD0169D767A0024547C /* LSInvocation.m */; };
 		8CFC75BA1B83737D0026AE74 /* LSURLDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD9169D767A0024547C /* LSURLDispatcher.m */; };
-		8CFC75BB1B83737D0026AE74 /* LSURLDispatcherThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */; };
 		8CFC75BC1B83737D0026AE74 /* LSURLDispatchOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */; };
 		8CFC75BD1B83737D0026AE74 /* LSTimerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 8CF15FD6169D767A0024547C /* LSTimerThread.m */; };
 		8CFC75BE1B83737D0026AE74 /* LSLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C0879601B7A242100AAA3AA /* LSLog.m */; };
@@ -113,7 +110,7 @@
 		8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLSThreadPoolLib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15F9F169D70050024547C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8CF15FA3169D70050024547C /* Lightstreamer Thread Pool Library-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lightstreamer Thread Pool Library-Prefix.pch"; sourceTree = "<group>"; };
-		8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool Library Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library iOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool Library iOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF15FB8169D70050024547C /* Lightstreamer Thread Pool Library Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Lightstreamer Thread Pool Library Tests-Info.plist"; sourceTree = "<group>"; };
 		8CF15FBD169D70050024547C /* Lightstreamer_Thread_Pool_Library_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Lightstreamer_Thread_Pool_Library_Tests.m; sourceTree = "<group>"; };
 		8CF15FCF169D767A0024547C /* LSInvocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSInvocation.h; sourceTree = "<group>"; };
@@ -127,14 +124,12 @@
 		8CF15FD7169D767A0024547C /* LSURLDispatchDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatchDelegate.h; sourceTree = "<group>"; };
 		8CF15FD8169D767A0024547C /* LSURLDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatcher.h; sourceTree = "<group>"; };
 		8CF15FD9169D767A0024547C /* LSURLDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatcher.m; sourceTree = "<group>"; };
-		8CF15FDA169D767A0024547C /* LSURLDispatcherThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatcherThread.h; sourceTree = "<group>"; };
-		8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatcherThread.m; sourceTree = "<group>"; };
 		8CF15FDC169D767A0024547C /* LSURLDispatchOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSURLDispatchOperation.h; sourceTree = "<group>"; };
 		8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LSURLDispatchOperation.m; sourceTree = "<group>"; };
 		8CF15FE9169D83790024547C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		8CF15FEE169DA6A60024547C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		8CFC759E1B8370080026AE74 /* libLSThreadPoolLibOSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLSThreadPoolLibOSX.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool Library OS X Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library macOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Lightstreamer Thread Pool Library macOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,9 +203,9 @@
 			isa = PBXGroup;
 			children = (
 				8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */,
-				8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library Tests.xctest */,
+				8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library iOS Tests.xctest */,
 				8CFC759E1B8370080026AE74 /* libLSThreadPoolLibOSX.a */,
-				8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests.xctest */,
+				8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library macOS Tests.xctest */,
 				8CB14B7C1C9C5DE600A6E423 /* libLSThreadPoolLibTvOS.a */,
 				8CB14B891C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests.xctest */,
 			);
@@ -243,8 +238,6 @@
 				8C0879641B7A4DE500AAA3AA /* LSURLDispatcher+Internals.h */,
 				8CF15FD9169D767A0024547C /* LSURLDispatcher.m */,
 				8CF15FD7169D767A0024547C /* LSURLDispatchDelegate.h */,
-				8CF15FDA169D767A0024547C /* LSURLDispatcherThread.h */,
-				8CF15FDB169D767A0024547C /* LSURLDispatcherThread.m */,
 				8CF15FDC169D767A0024547C /* LSURLDispatchOperation.h */,
 				8C0879661B7A5EE300AAA3AA /* LSURLDispatchOperation+Internals.h */,
 				8CF15FDD169D767A0024547C /* LSURLDispatchOperation.m */,
@@ -307,6 +300,7 @@
 				8CB14B781C9C5DE600A6E423 /* Sources */,
 				8CB14B791C9C5DE600A6E423 /* Frameworks */,
 				8CB14B7A1C9C5DE600A6E423 /* CopyFiles */,
+				8CADBD7B1D8C4259004496F4 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -335,9 +329,9 @@
 			productReference = 8CB14B891C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library */ = {
+		8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CF15FC1169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library" */;
+			buildConfigurationList = 8CF15FC1169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library iOS" */;
 			buildPhases = (
 				8CF15F98169D70050024547C /* Sources */,
 				8CF15F99169D70050024547C /* Frameworks */,
@@ -348,14 +342,14 @@
 			);
 			dependencies = (
 			);
-			name = "Lightstreamer Thread Pool Library";
+			name = "Lightstreamer Thread Pool Library iOS";
 			productName = "Lightstreamer Thread Pool Library";
 			productReference = 8CF15F9C169D70050024547C /* libLSThreadPoolLib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		8CF15FAC169D70050024547C /* Lightstreamer Thread Pool Library Tests */ = {
+		8CF15FAC169D70050024547C /* Lightstreamer Thread Pool Library iOS Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CF15FC4169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library Tests" */;
+			buildConfigurationList = 8CF15FC4169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library iOS Tests" */;
 			buildPhases = (
 				8CF15FA8169D70050024547C /* Sources */,
 				8CF15FA9169D70050024547C /* Frameworks */,
@@ -366,14 +360,14 @@
 			dependencies = (
 				8CF15FB4169D70050024547C /* PBXTargetDependency */,
 			);
-			name = "Lightstreamer Thread Pool Library Tests";
+			name = "Lightstreamer Thread Pool Library iOS Tests";
 			productName = "Lightstreamer Thread Pool LibraryTests";
-			productReference = 8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library Tests.xctest */;
+			productReference = 8CF15FAD169D70050024547C /* Lightstreamer Thread Pool Library iOS Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library OS X */ = {
+		8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CFC75AF1B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library OS X" */;
+			buildConfigurationList = 8CFC75AF1B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library macOS" */;
 			buildPhases = (
 				8CFC759A1B8370080026AE74 /* Sources */,
 				8CFC759B1B8370080026AE74 /* Frameworks */,
@@ -383,14 +377,14 @@
 			);
 			dependencies = (
 			);
-			name = "Lightstreamer Thread Pool Library OS X";
+			name = "Lightstreamer Thread Pool Library macOS";
 			productName = "Lightstreamer Thread Pool Library OS X";
 			productReference = 8CFC759E1B8370080026AE74 /* libLSThreadPoolLibOSX.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		8CFC75A71B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests */ = {
+		8CFC75A71B8370080026AE74 /* Lightstreamer Thread Pool Library macOS Tests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8CFC75B21B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library OS X Tests" */;
+			buildConfigurationList = 8CFC75B21B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library macOS Tests" */;
 			buildPhases = (
 				8CFC75A41B8370080026AE74 /* Sources */,
 				8CFC75A51B8370080026AE74 /* Frameworks */,
@@ -401,9 +395,9 @@
 			dependencies = (
 				8CFC75AB1B8370080026AE74 /* PBXTargetDependency */,
 			);
-			name = "Lightstreamer Thread Pool Library OS X Tests";
+			name = "Lightstreamer Thread Pool Library macOS Tests";
 			productName = "Lightstreamer Thread Pool Library OS XTests";
-			productReference = 8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests.xctest */;
+			productReference = 8CFC75A81B8370080026AE74 /* Lightstreamer Thread Pool Library macOS Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -413,7 +407,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastTestingUpgradeCheck = 0640;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Weswit srl";
 				TargetAttributes = {
 					8CB14B7B1C9C5DE600A6E423 = {
@@ -442,10 +436,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library */,
-				8CF15FAC169D70050024547C /* Lightstreamer Thread Pool Library Tests */,
-				8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library OS X */,
-				8CFC75A71B8370080026AE74 /* Lightstreamer Thread Pool Library OS X Tests */,
+				8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library iOS */,
+				8CF15FAC169D70050024547C /* Lightstreamer Thread Pool Library iOS Tests */,
+				8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library macOS */,
+				8CFC75A71B8370080026AE74 /* Lightstreamer Thread Pool Library macOS Tests */,
 				8CB14B7B1C9C5DE600A6E423 /* Lightstreamer Thread Pool Library tvOS */,
 				8CB14B881C9C5E0800A6E423 /* Lightstreamer Thread Pool Library tvOS Tests */,
 			);
@@ -477,6 +471,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		8CADBD7B1D8C4259004496F4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "##########################################\n#\n# c.f. http://stackoverflow.com/questions/3520977/build-fat-static-library-device-simulator-using-xcode-and-sdk-4\n#\n# Version 2.7\n#\n# Latest Change:\n# - Supports iPhone 5 / iPod Touch 5 (uses Apple's workaround to lipo bug)\n#\n# Purpose:\n#   Automatically create a Universal static library for iPhone + iPad + iPhone Simulator from within XCode\n#\n# Author: Adam Martin - http://twitter.com/redglassesapps\n# Based on: original script from Eonil (main changes: Eonil's script WILL NOT WORK in Xcode GUI - it WILL CRASH YOUR COMPUTER)\n#\n\nset -e\nset -o pipefail\n\n#################[ Tests: helps workaround any future bugs in Xcode ]########\n#\nDEBUG_THIS_SCRIPT=\"false\"\n\nif [ $DEBUG_THIS_SCRIPT = \"true\" ]\nthen\necho \"########### TESTS #############\"\necho \"Use the following variables when debugging this script; note that they may change on recursions\"\necho \"BUILD_DIR = $BUILD_DIR\"\necho \"BUILD_ROOT = $BUILD_ROOT\"\necho \"CONFIGURATION_BUILD_DIR = $CONFIGURATION_BUILD_DIR\"\necho \"BUILT_PRODUCTS_DIR = $BUILT_PRODUCTS_DIR\"\necho \"CONFIGURATION_TEMP_DIR = $CONFIGURATION_TEMP_DIR\"\necho \"TARGET_BUILD_DIR = $TARGET_BUILD_DIR\"\nfi\n\n#####################[ part 1 ]##################\n# First, work out the BASESDK version number (NB: Apple ought to report this, but they hide it)\n#    (incidental: searching for substrings in sh is a nightmare! Sob)\n\nSDK_VERSION=$(echo ${SDK_NAME} | grep -o '.\\{4\\}$')\n\n# Next, work out if we're in SIM or DEVICE\n\nif [ ${PLATFORM_NAME} = \"appletvsimulator\" ]\nthen\nOTHER_SDK_TO_BUILD=appletvos${SDK_VERSION}\nelse\nOTHER_SDK_TO_BUILD=appletvsimulator${SDK_VERSION}\nfi\n\necho \"XCode has selected SDK: ${PLATFORM_NAME} with version: ${SDK_VERSION} (although back-targetting: ${TVOS_DEPLOYMENT_TARGET})\"\necho \"...therefore, OTHER_SDK_TO_BUILD = ${OTHER_SDK_TO_BUILD}\"\n#\n#####################[ end of part 1 ]##################\n\n#####################[ part 2 ]##################\n#\n# IF this is the original invocation, invoke WHATEVER other builds are required\n#\n# Xcode is already building ONE target...\n#\n# ...but this is a LIBRARY, so Apple is wrong to set it to build just one.\n# ...we need to build ALL targets\n# ...we MUST NOT re-build the target that is ALREADY being built: Xcode WILL CRASH YOUR COMPUTER if you try this (infinite recursion!)\n#\n#\n# So: build ONLY the missing platforms/configurations.\n\nif [ \"true\" == ${ALREADYINVOKED:-false} ]\nthen\necho \"RECURSION: I am NOT the root invocation, so I'm NOT going to recurse\"\nelse\n# CRITICAL:\n# Prevent infinite recursion (Xcode sucks)\nexport ALREADYINVOKED=\"true\"\n\necho \"RECURSION: I am the root ... recursing all missing build targets NOW...\"\necho \"RECURSION: ...about to invoke: xcodebuild -configuration \\\"${CONFIGURATION}\\\" -project \\\"${PROJECT_NAME}.xcodeproj\\\" -target \\\"${TARGET_NAME}\\\" -sdk \\\"${OTHER_SDK_TO_BUILD}\\\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO\" BUILD_DIR=\\\"${BUILD_DIR}\\\" BUILD_ROOT=\\\"${BUILD_ROOT}\\\" SYMROOT=\\\"${SYMROOT}\\\"\n\nxcodebuild -configuration \"${CONFIGURATION}\" -project \"${PROJECT_NAME}.xcodeproj\" -target \"${TARGET_NAME}\" -sdk \"${OTHER_SDK_TO_BUILD}\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" SYMROOT=\"${SYMROOT}\"\n\nACTION=\"build\"\n\n#Merge all platform binaries as a fat binary for each configurations.\n\n# Calculate where the (multiple) built files are coming from:\nCURRENTCONFIG_DEVICE_DIR=${SYMROOT}/${CONFIGURATION}-appletvos\nCURRENTCONFIG_SIMULATOR_DIR=${SYMROOT}/${CONFIGURATION}-appletvsimulator\n\necho \"Taking device build from: ${CURRENTCONFIG_DEVICE_DIR}\"\necho \"Taking simulator build from: ${CURRENTCONFIG_SIMULATOR_DIR}\"\n\nCREATING_UNIVERSAL_DIR=${SYMROOT}/${CONFIGURATION}-universal\necho \"...I will output a universal build to: ${CREATING_UNIVERSAL_DIR}\"\n\n# ... remove the products of previous runs of this script\n#      NB: this directory is ONLY created by this script - it should be safe to delete!\n\nrm -rf \"${CREATING_UNIVERSAL_DIR}\"\nmkdir \"${CREATING_UNIVERSAL_DIR}\"\n\n#\necho \"lipo: for current configuration (${CONFIGURATION}) creating output file: ${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\"\nxcrun -sdk appletvos lipo -create -output \"${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_DEVICE_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_SIMULATOR_DIR}/${EXECUTABLE_NAME}\"\n\n#########\n#\n# Added: StackOverflow suggestion to also copy \"include\" files\n#    (untested, but should work OK)\n#\necho \"Fetching headers from ${PUBLIC_HEADERS_FOLDER_PATH}\"\necho \"  (if you embed your library project in another project, you will need to add\"\necho \"   a \"User Search Headers\" build setting of: (NB INCLUDE THE DOUBLE QUOTES BELOW!)\"\necho '        \"$(TARGET_BUILD_DIR)/usr/local/include/\"'\nif [ -d \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\" ]\nthen\nmkdir -p \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\n# * needs to be outside the double quotes?\ncp -r \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"* \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\nfi\nfi";
+			showEnvVarsInLog = 0;
+		};
 		8CFC75991B836F8A0026AE74 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -488,7 +496,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##########################################\n#\n# c.f. http://stackoverflow.com/questions/3520977/build-fat-static-library-device-simulator-using-xcode-and-sdk-4\n#\n# Version 2.7\n#\n# Latest Change:\n# - Supports iPhone 5 / iPod Touch 5 (uses Apple's workaround to lipo bug)\n#\n# Purpose:\n#   Automatically create a Universal static library for iPhone + iPad + iPhone Simulator from within XCode\n#\n# Author: Adam Martin - http://twitter.com/redglassesapps\n# Based on: original script from Eonil (main changes: Eonil's script WILL NOT WORK in Xcode GUI - it WILL CRASH YOUR COMPUTER)\n#\n\nset -e\nset -o pipefail\n\n#################[ Tests: helps workaround any future bugs in Xcode ]########\n#\nDEBUG_THIS_SCRIPT=\"false\"\n\nif [ $DEBUG_THIS_SCRIPT = \"true\" ]\nthen\necho \"########### TESTS #############\"\necho \"Use the following variables when debugging this script; note that they may change on recursions\"\necho \"BUILD_DIR = $BUILD_DIR\"\necho \"BUILD_ROOT = $BUILD_ROOT\"\necho \"CONFIGURATION_BUILD_DIR = $CONFIGURATION_BUILD_DIR\"\necho \"BUILT_PRODUCTS_DIR = $BUILT_PRODUCTS_DIR\"\necho \"CONFIGURATION_TEMP_DIR = $CONFIGURATION_TEMP_DIR\"\necho \"TARGET_BUILD_DIR = $TARGET_BUILD_DIR\"\nfi\n\n#####################[ part 1 ]##################\n# First, work out the BASESDK version number (NB: Apple ought to report this, but they hide it)\n#    (incidental: searching for substrings in sh is a nightmare! Sob)\n\nSDK_VERSION=$(echo ${SDK_NAME} | grep -o '.\\{3\\}$')\n\n# Next, work out if we're in SIM or DEVICE\n\nif [ ${PLATFORM_NAME} = \"iphonesimulator\" ]\nthen\nOTHER_SDK_TO_BUILD=iphoneos${SDK_VERSION}\nelse\nOTHER_SDK_TO_BUILD=iphonesimulator${SDK_VERSION}\nfi\n\necho \"XCode has selected SDK: ${PLATFORM_NAME} with version: ${SDK_VERSION} (although back-targetting: ${IPHONEOS_DEPLOYMENT_TARGET})\"\necho \"...therefore, OTHER_SDK_TO_BUILD = ${OTHER_SDK_TO_BUILD}\"\n#\n#####################[ end of part 1 ]##################\n\n#####################[ part 2 ]##################\n#\n# IF this is the original invocation, invoke WHATEVER other builds are required\n#\n# Xcode is already building ONE target...\n#\n# ...but this is a LIBRARY, so Apple is wrong to set it to build just one.\n# ...we need to build ALL targets\n# ...we MUST NOT re-build the target that is ALREADY being built: Xcode WILL CRASH YOUR COMPUTER if you try this (infinite recursion!)\n#\n#\n# So: build ONLY the missing platforms/configurations.\n\nif [ \"true\" == ${ALREADYINVOKED:-false} ]\nthen\necho \"RECURSION: I am NOT the root invocation, so I'm NOT going to recurse\"\nelse\n# CRITICAL:\n# Prevent infinite recursion (Xcode sucks)\nexport ALREADYINVOKED=\"true\"\n\necho \"RECURSION: I am the root ... recursing all missing build targets NOW...\"\necho \"RECURSION: ...about to invoke: xcodebuild -configuration \\\"${CONFIGURATION}\\\" -project \\\"${PROJECT_NAME}.xcodeproj\\\" -target \\\"${TARGET_NAME}\\\" -sdk \\\"${OTHER_SDK_TO_BUILD}\\\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO\" BUILD_DIR=\\\"${BUILD_DIR}\\\" BUILD_ROOT=\\\"${BUILD_ROOT}\\\" SYMROOT=\\\"${SYMROOT}\\\"\n\nxcodebuild -configuration \"${CONFIGURATION}\" -project \"${PROJECT_NAME}.xcodeproj\" -target \"${TARGET_NAME}\" -sdk \"${OTHER_SDK_TO_BUILD}\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" SYMROOT=\"${SYMROOT}\"\n\nACTION=\"build\"\n\n#Merge all platform binaries as a fat binary for each configurations.\n\n# Calculate where the (multiple) built files are coming from:\nCURRENTCONFIG_DEVICE_DIR=${SYMROOT}/${CONFIGURATION}-iphoneos\nCURRENTCONFIG_SIMULATOR_DIR=${SYMROOT}/${CONFIGURATION}-iphonesimulator\n\necho \"Taking device build from: ${CURRENTCONFIG_DEVICE_DIR}\"\necho \"Taking simulator build from: ${CURRENTCONFIG_SIMULATOR_DIR}\"\n\nCREATING_UNIVERSAL_DIR=${SYMROOT}/${CONFIGURATION}-universal\necho \"...I will output a universal build to: ${CREATING_UNIVERSAL_DIR}\"\n\n# ... remove the products of previous runs of this script\n#      NB: this directory is ONLY created by this script - it should be safe to delete!\n\nrm -rf \"${CREATING_UNIVERSAL_DIR}\"\nmkdir \"${CREATING_UNIVERSAL_DIR}\"\n\n#\necho \"lipo: for current configuration (${CONFIGURATION}) creating output file: ${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\"\nxcrun -sdk iphoneos lipo -create -output \"${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_DEVICE_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_SIMULATOR_DIR}/${EXECUTABLE_NAME}\"\n\n#########\n#\n# Added: StackOverflow suggestion to also copy \"include\" files\n#    (untested, but should work OK)\n#\necho \"Fetching headers from ${PUBLIC_HEADERS_FOLDER_PATH}\"\necho \"  (if you embed your library project in another project, you will need to add\"\necho \"   a \"User Search Headers\" build setting of: (NB INCLUDE THE DOUBLE QUOTES BELOW!)\"\necho '        \"$(TARGET_BUILD_DIR)/usr/local/include/\"'\nif [ -d \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\" ]\nthen\nmkdir -p \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\n# * needs to be outside the double quotes?\ncp -r \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"* \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\nfi\nfi";
+			shellScript = "##########################################\n#\n# c.f. http://stackoverflow.com/questions/3520977/build-fat-static-library-device-simulator-using-xcode-and-sdk-4\n#\n# Version 2.7\n#\n# Latest Change:\n# - Supports iPhone 5 / iPod Touch 5 (uses Apple's workaround to lipo bug)\n#\n# Purpose:\n#   Automatically create a Universal static library for iPhone + iPad + iPhone Simulator from within XCode\n#\n# Author: Adam Martin - http://twitter.com/redglassesapps\n# Based on: original script from Eonil (main changes: Eonil's script WILL NOT WORK in Xcode GUI - it WILL CRASH YOUR COMPUTER)\n#\n\nset -e\nset -o pipefail\n\n#################[ Tests: helps workaround any future bugs in Xcode ]########\n#\nDEBUG_THIS_SCRIPT=\"false\"\n\nif [ $DEBUG_THIS_SCRIPT = \"true\" ]\nthen\necho \"########### TESTS #############\"\necho \"Use the following variables when debugging this script; note that they may change on recursions\"\necho \"BUILD_DIR = $BUILD_DIR\"\necho \"BUILD_ROOT = $BUILD_ROOT\"\necho \"CONFIGURATION_BUILD_DIR = $CONFIGURATION_BUILD_DIR\"\necho \"BUILT_PRODUCTS_DIR = $BUILT_PRODUCTS_DIR\"\necho \"CONFIGURATION_TEMP_DIR = $CONFIGURATION_TEMP_DIR\"\necho \"TARGET_BUILD_DIR = $TARGET_BUILD_DIR\"\nfi\n\n#####################[ part 1 ]##################\n# First, work out the BASESDK version number (NB: Apple ought to report this, but they hide it)\n#    (incidental: searching for substrings in sh is a nightmare! Sob)\n\nSDK_VERSION=$(echo ${SDK_NAME} | grep -o '.\\{4\\}$')\n\n# Next, work out if we're in SIM or DEVICE\n\nif [ ${PLATFORM_NAME} = \"iphonesimulator\" ]\nthen\nOTHER_SDK_TO_BUILD=iphoneos${SDK_VERSION}\nelse\nOTHER_SDK_TO_BUILD=iphonesimulator${SDK_VERSION}\nfi\n\necho \"XCode has selected SDK: ${PLATFORM_NAME} with version: ${SDK_VERSION} (although back-targetting: ${IPHONEOS_DEPLOYMENT_TARGET})\"\necho \"...therefore, OTHER_SDK_TO_BUILD = ${OTHER_SDK_TO_BUILD}\"\n#\n#####################[ end of part 1 ]##################\n\n#####################[ part 2 ]##################\n#\n# IF this is the original invocation, invoke WHATEVER other builds are required\n#\n# Xcode is already building ONE target...\n#\n# ...but this is a LIBRARY, so Apple is wrong to set it to build just one.\n# ...we need to build ALL targets\n# ...we MUST NOT re-build the target that is ALREADY being built: Xcode WILL CRASH YOUR COMPUTER if you try this (infinite recursion!)\n#\n#\n# So: build ONLY the missing platforms/configurations.\n\nif [ \"true\" == ${ALREADYINVOKED:-false} ]\nthen\necho \"RECURSION: I am NOT the root invocation, so I'm NOT going to recurse\"\nelse\n# CRITICAL:\n# Prevent infinite recursion (Xcode sucks)\nexport ALREADYINVOKED=\"true\"\n\necho \"RECURSION: I am the root ... recursing all missing build targets NOW...\"\necho \"RECURSION: ...about to invoke: xcodebuild -configuration \\\"${CONFIGURATION}\\\" -project \\\"${PROJECT_NAME}.xcodeproj\\\" -target \\\"${TARGET_NAME}\\\" -sdk \\\"${OTHER_SDK_TO_BUILD}\\\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO\" BUILD_DIR=\\\"${BUILD_DIR}\\\" BUILD_ROOT=\\\"${BUILD_ROOT}\\\" SYMROOT=\\\"${SYMROOT}\\\"\n\nxcodebuild -configuration \"${CONFIGURATION}\" -project \"${PROJECT_NAME}.xcodeproj\" -target \"${TARGET_NAME}\" -sdk \"${OTHER_SDK_TO_BUILD}\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" SYMROOT=\"${SYMROOT}\"\n\nACTION=\"build\"\n\n#Merge all platform binaries as a fat binary for each configurations.\n\n# Calculate where the (multiple) built files are coming from:\nCURRENTCONFIG_DEVICE_DIR=${SYMROOT}/${CONFIGURATION}-iphoneos\nCURRENTCONFIG_SIMULATOR_DIR=${SYMROOT}/${CONFIGURATION}-iphonesimulator\n\necho \"Taking device build from: ${CURRENTCONFIG_DEVICE_DIR}\"\necho \"Taking simulator build from: ${CURRENTCONFIG_SIMULATOR_DIR}\"\n\nCREATING_UNIVERSAL_DIR=${SYMROOT}/${CONFIGURATION}-universal\necho \"...I will output a universal build to: ${CREATING_UNIVERSAL_DIR}\"\n\n# ... remove the products of previous runs of this script\n#      NB: this directory is ONLY created by this script - it should be safe to delete!\n\nrm -rf \"${CREATING_UNIVERSAL_DIR}\"\nmkdir \"${CREATING_UNIVERSAL_DIR}\"\n\n#\necho \"lipo: for current configuration (${CONFIGURATION}) creating output file: ${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\"\nxcrun -sdk iphoneos lipo -create -output \"${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_DEVICE_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_SIMULATOR_DIR}/${EXECUTABLE_NAME}\"\n\n#########\n#\n# Added: StackOverflow suggestion to also copy \"include\" files\n#    (untested, but should work OK)\n#\necho \"Fetching headers from ${PUBLIC_HEADERS_FOLDER_PATH}\"\necho \"  (if you embed your library project in another project, you will need to add\"\necho \"   a \"User Search Headers\" build setting of: (NB INCLUDE THE DOUBLE QUOTES BELOW!)\"\necho '        \"$(TARGET_BUILD_DIR)/usr/local/include/\"'\nif [ -d \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\" ]\nthen\nmkdir -p \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\n# * needs to be outside the double quotes?\ncp -r \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"* \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\nfi\nfi";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -502,7 +510,6 @@
 				8CB14B951C9C5F6300A6E423 /* LSThreadPoolThread.m in Sources */,
 				8CB14B961C9C5F6300A6E423 /* LSInvocation.m in Sources */,
 				8CB14B971C9C5F6300A6E423 /* LSURLDispatcher.m in Sources */,
-				8CB14B981C9C5F6300A6E423 /* LSURLDispatcherThread.m in Sources */,
 				8CB14B991C9C5F6300A6E423 /* LSURLDispatchOperation.m in Sources */,
 				8CB14B9A1C9C5F6300A6E423 /* LSURLAuthenticationChallengeSender.m in Sources */,
 				8CB14B9B1C9C5F6300A6E423 /* LSTimerThread.m in Sources */,
@@ -528,7 +535,6 @@
 				8C0879611B7A242100AAA3AA /* LSLog.m in Sources */,
 				8CF15FE1169D767A0024547C /* LSTimerThread.m in Sources */,
 				8CF15FE2169D767A0024547C /* LSURLDispatcher.m in Sources */,
-				8CF15FE3169D767A0024547C /* LSURLDispatcherThread.m in Sources */,
 				8CF15FE4169D767A0024547C /* LSURLDispatchOperation.m in Sources */,
 				8C981D9D1BF3A4FD007C3ADC /* LSURLAuthenticationChallengeSender.m in Sources */,
 			);
@@ -550,7 +556,6 @@
 				8CFC75B81B83737D0026AE74 /* LSThreadPoolThread.m in Sources */,
 				8CFC75B91B83737D0026AE74 /* LSInvocation.m in Sources */,
 				8CFC75BA1B83737D0026AE74 /* LSURLDispatcher.m in Sources */,
-				8CFC75BB1B83737D0026AE74 /* LSURLDispatcherThread.m in Sources */,
 				8CFC75BC1B83737D0026AE74 /* LSURLDispatchOperation.m in Sources */,
 				8CFC75BD1B83737D0026AE74 /* LSTimerThread.m in Sources */,
 				8CFC75BE1B83737D0026AE74 /* LSLog.m in Sources */,
@@ -576,12 +581,12 @@
 		};
 		8CF15FB4169D70050024547C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library */;
+			target = 8CF15F9B169D70050024547C /* Lightstreamer Thread Pool Library iOS */;
 			targetProxy = 8CF15FB3169D70050024547C /* PBXContainerItemProxy */;
 		};
 		8CFC75AB1B8370080026AE74 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library OS X */;
+			target = 8CFC759D1B8370080026AE74 /* Lightstreamer Thread Pool Library macOS */;
 			targetProxy = 8CFC75AA1B8370080026AE74 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -717,7 +722,9 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -753,7 +760,9 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
@@ -777,7 +786,7 @@
 				DSTROOT = /tmp/Lightstreamer_Thread_Pool_Library.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLib;
 				SDKROOT = iphoneos;
@@ -793,7 +802,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLib;
 				SDKROOT = iphoneos;
@@ -813,7 +822,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -832,7 +841,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Lightstreamer Thread Pool Library/Lightstreamer Thread Pool Library-Prefix.pch";
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -860,7 +869,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLibOSX;
@@ -890,7 +899,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = LSThreadPoolLibOSX;
@@ -924,7 +933,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -958,7 +967,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				INFOPLIST_FILE = "Lightstreamer Thread Pool Library Tests/Lightstreamer Thread Pool Library Tests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lightstreamer.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -996,7 +1005,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CF15FC1169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library" */ = {
+		8CF15FC1169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CF15FC2169D70050024547C /* Debug */,
@@ -1005,7 +1014,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CF15FC4169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library Tests" */ = {
+		8CF15FC4169D70050024547C /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library iOS Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CF15FC5169D70050024547C /* Debug */,
@@ -1014,7 +1023,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CFC75AF1B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library OS X" */ = {
+		8CFC75AF1B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CFC75B01B8370080026AE74 /* Debug */,
@@ -1023,7 +1032,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8CFC75B21B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library OS X Tests" */ = {
+		8CFC75B21B8370080026AE74 /* Build configuration list for PBXNativeTarget "Lightstreamer Thread Pool Library macOS Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8CFC75B31B8370080026AE74 /* Debug */,

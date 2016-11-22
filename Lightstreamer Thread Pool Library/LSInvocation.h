@@ -22,7 +22,7 @@
 
 
 /**
- @brief Type used to characterize blocks that can be schedule for call with LSThreadPool.
+ @brief Type used to characterize blocks that can be scheduled for call with LSThreadPool.
  */
 typedef void (^LSInvocationBlock)(void);
 
@@ -39,7 +39,7 @@ typedef void (^LSInvocationBlock)(void);
 
 /**
  @brief Waits for the scheduled call to complete.
- <br/> Puts the calling thread to wait until the scheduled call execution has been completed.
+ <br/> Puts the calling thread on wait until the scheduled call execution has been completed.
  */
 - (void) waitForCompletion;
 

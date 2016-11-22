@@ -37,8 +37,6 @@
 
 /**
  @brief Cancels the URL request operation, freeing the connection.
- <br/> The call is executed on a background thread. So it returns immeditaly, byt the operation may keep going for a while 
- before it is actually cancelled.
  */
 - (void) cancel;
 
