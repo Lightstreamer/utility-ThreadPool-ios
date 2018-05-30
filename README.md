@@ -98,6 +98,9 @@ LSURLDispatchOperation *longOp= [[LSURLDispatcher sharedDispatcher] dispatchLong
 Starting with **version 1.7.0** request operations are executed on `NSURLSession` threads. The library now uses 
 its own thread pools only to enqueue requests in excess and decoupling the delivery of delegate events.
 
+Starting with **verison 1.8.0** the library uses GCD queues to enqueue requests in excess and decoupling the delivery of delegate events.
+Thread pools remain available as part of the library but are no more used by the `LSURLDispatcher`.
+
 
 LSThreadPool
 ------------
