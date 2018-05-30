@@ -41,16 +41,16 @@
 #pragma mark Lightstreamer_Thread_Pool_Library_Tests declaration
 
 @interface Lightstreamer_Thread_Pool_Library_Tests : XCTestCase <LSURLDispatchDelegate> {
-	LSThreadPool *_threadPool;
-	
-	NSUInteger _count;
-	NSUInteger _failedCount;
-	NSCondition *_semaphore;
+    LSThreadPool *_threadPool;
+    
+    NSUInteger _count;
+    NSUInteger _failedCount;
+    NSCondition *_semaphore;
     
     NSDate *_timerBegin;
-    NSMutableDictionary *_timerInvocations;
-	
-	NSMutableDictionary *_downloads;
+    NSMutableDictionary<NSNumber *, NSNumber *> *_timerInvocations;
+    
+    NSMutableDictionary<NSString *, NSMutableData *> *_downloads;
 }
 
 
@@ -74,19 +74,19 @@
 
 - (void) setUp {
     [super setUp];
-	
-	// Create thread pool
-	_threadPool= [[LSThreadPool alloc] initWithName:@"Test" size:4];
+    
+    // Create thread pool
+    _threadPool= [[LSThreadPool alloc] initWithName:@"Test" size:4];
 }
 
 - (void) tearDown {
-	
-	// Dispose and release thread pool
-	[_threadPool dispose];
-	_threadPool= nil;
-	
-	// Dispose the URL dispatcher
-	[LSURLDispatcher dispose];
+    
+    // Dispose and release thread pool
+    [_threadPool dispose];
+    _threadPool= nil;
+    
+    // Dispose the URL dispatcher
+    [LSURLDispatcher dispose];
     
     [super tearDown];
 }
@@ -100,58 +100,58 @@
  <br/> You can monitor the pool size and thread execution on the console.
  */
 - (void) testThreadPool {
-	[LSLog disableAllSourceTypes];
-	[LSLog enableSourceType:LOG_SRC_THREAD_POOL];
-	
-	_count= 0;
+    [LSLog disableAllSourceTypes];
+    [LSLog enableSourceType:LOG_SRC_THREAD_POOL];
+    
+    _count= 0;
 
-	_semaphore= [[NSCondition alloc] init];
-	[_semaphore lock];
-	
-	for (int i= 0; i < THREAD_POOL_TEST_COUNT; i++) {
-		[_threadPool scheduleInvocationForBlock:^{
-			
-			// Sleep up to 1.0 secs
-			int random= 0;
-			int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+    _semaphore= [[NSCondition alloc] init];
+    [_semaphore lock];
+    
+    for (int i= 0; i < THREAD_POOL_TEST_COUNT; i++) {
+        [_threadPool scheduleInvocationForBlock:^{
+            
+            // Sleep up to 1.0 secs
+            int random= 0;
+            int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
             if (result != 0)
                 NSLog(@"%@: could net get a random number", [NSThread currentThread].name);
             
-			NSTimeInterval delay= ((double) (ABS(random) % THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS)) / 1000.0;
-			
-			[NSThread sleepForTimeInterval:delay];
-			
-			// Update count
-			NSUInteger count= 0;
-			@synchronized (self) {
-				_count++;
-				
-				count= _count;
-			}
-			
-			NSLog(@"%@: count: %lu", [NSThread currentThread].name, (unsigned long) count);
-		}];
-	}
-	
-	[_threadPool scheduleInvocationForBlock:^{
+            NSTimeInterval delay= ((double) (ABS(random) % THREAD_POOL_TEST_MAX_COUNT_DELAY_MSECS)) / 1000.0;
+            
+            [NSThread sleepForTimeInterval:delay];
+            
+            // Update count
+            NSUInteger count= 0;
+            @synchronized (self) {
+                self->_count++;
+                
+                count= self->_count;
+            }
+            
+            NSLog(@"%@: count: %lu", [NSThread currentThread].name, (unsigned long) count);
+        }];
+    }
+    
+    [_threadPool scheduleInvocationForBlock:^{
 
-		// Sleep 2.0 secs
-		[NSThread sleepForTimeInterval:THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS / 1000.0];
-		
-		// Notifiy end of count
-		[_semaphore lock];
-		[_semaphore signal];
-		[_semaphore unlock];
-	}];
-	
-	NSLog(@"TestThreadPool: invocations scheduled, waiting...");
-	
-	[_semaphore wait];
-	[_semaphore unlock];
+        // Sleep 2.0 secs
+        [NSThread sleepForTimeInterval:THREAD_POOL_TEST_SEMAPHORE_NOTIFY_DELAY_MSECS / 1000.0];
+        
+        // Notifiy end of count
+        [self->_semaphore lock];
+        [self->_semaphore signal];
+        [self->_semaphore unlock];
+    }];
+    
+    NSLog(@"TestThreadPool: invocations scheduled, waiting...");
+    
+    [_semaphore wait];
+    [_semaphore unlock];
 
-	_semaphore= nil;
+    _semaphore= nil;
 
-	XCTAssertTrue(_count == THREAD_POOL_TEST_COUNT, @"Not all invocations have been performed (count: %lu)", (unsigned long) _count);
+    XCTAssertTrue(_count == THREAD_POOL_TEST_COUNT, @"Not all invocations have been performed (count: %lu)", (unsigned long) _count);
 }
 
 #if !TARGET_OS_SIMULATOR
@@ -172,19 +172,18 @@
     _timerInvocations= [NSMutableDictionary dictionary];
     
     NSTimeInterval delay= TIMER_TEST_INITIAL_DELAY;
-    NSMutableArray *expectedDelays= [NSMutableArray array];
+    NSMutableArray<NSNumber *> *expectedDelays= [NSMutableArray array];
     
     NSLog(@"Scheduling %d delayed invocations...", TIMER_TEST_COUNT);
     
     for (int i= 0; i < TIMER_TEST_COUNT; i++) {
-        [expectedDelays addObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSinceDate:_timerBegin] + delay]];
+        [expectedDelays addObject:@([[NSDate date] timeIntervalSinceDate:_timerBegin] + delay)];
         
-        NSNumber *number= [NSNumber numberWithInt:i];
         switch (i % 2) {
             case 0: {
                 [[LSTimerThread sharedTimer] performBlock:^{
 
-                    [self saveInvocationTime:number];
+                    [self saveInvocationTime:@(i)];
                 
                 } afterDelay:delay];
                 break;
@@ -193,7 +192,7 @@
             case 1: {
                 [[LSTimerThread sharedTimer] performSelector:@selector(saveInvocationTime:)
                                                     onTarget:self
-                                                  withObject:number
+                                                  withObject:@(i)
                                                   afterDelay:delay];
                 break;
             }
@@ -208,18 +207,16 @@
     }
     
     // Get the last expected delay and wait for it
-    NSNumber *lastExpectedDelay= [expectedDelays lastObject];
-    NSTimeInterval wait= [lastExpectedDelay doubleValue] + TIMER_TEST_INCREMENTAL_DELAY_MIN;
+    NSNumber *lastExpectedDelay= expectedDelays.lastObject;
+    NSTimeInterval wait= lastExpectedDelay.doubleValue + TIMER_TEST_INCREMENTAL_DELAY_MIN;
     
     NSLog(@"Scheduled %d delayed invocations, waiting %.1f secs...", TIMER_TEST_COUNT, wait);
     
     [NSThread sleepForTimeInterval:wait];
     
     for (int i= 0; i < TIMER_TEST_COUNT; i++) {
-        NSNumber *expectedDelay= [expectedDelays objectAtIndex:i];
-
-        NSNumber *number= [NSNumber numberWithInt:i];
-        NSNumber *actualDelay= [_timerInvocations objectForKey:number];
+        NSNumber *expectedDelay= expectedDelays[i];
+        NSNumber *actualDelay= _timerInvocations[@(i)];
         
         XCTAssertEqualWithAccuracy([expectedDelay doubleValue], [actualDelay doubleValue], 0.05);
     }
@@ -261,8 +258,8 @@
     _semaphore= nil;
     
     NSUInteger sum= 0;
-    for (NSMutableData *download in [_downloads allValues])
-        sum += [download length];
+    for (NSMutableData *download in _downloads.allValues)
+        sum += download.length;
     
     XCTAssertTrue(sum > _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES, @"Downloads total does not sum up to required mininum (sum: %lu, minimum: %lu)", (unsigned long) sum, (unsigned long) _count * URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES);
 }
@@ -271,8 +268,7 @@
 #pragma mark Callback for timer test
 
 - (void) saveInvocationTime:(NSNumber *)number {
-    [_timerInvocations setObject:[NSNumber numberWithDouble:[[NSDate date] timeIntervalSinceDate:_timerBegin]]
-                                                     forKey:number];
+    _timerInvocations[number]= @([[NSDate date] timeIntervalSinceDate:_timerBegin]);
 }
 
 
@@ -280,76 +276,76 @@
 #pragma mark Methods of LSURLDispatchDelegate
 
 - (void) dispatchOperation:(LSURLDispatchOperation *)operation willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-	[challenge.sender performDefaultHandlingForAuthenticationChallenge:challenge];
+    [challenge.sender performDefaultHandlingForAuthenticationChallenge:challenge];
 }
 
 - (void) dispatchOperation:(LSURLDispatchOperation *)operation didReceiveResponse:(NSURLResponse *)response {}
 
 - (void) dispatchOperation:(LSURLDispatchOperation *)operation didReceiveData:(NSData *)data {
-	
-	// Get a key for the operation
-	NSString *opKey= [NSString stringWithFormat:@"%p", operation];
-	BOOL finished= NO;
+    
+    // Get a key for the operation
+    NSString *opKey= [NSString stringWithFormat:@"%p", operation];
+    BOOL finished= NO;
 
-	NSUInteger downloaded= 0;
-	@synchronized (self) {
-		
-		// Get current download for this operation
-		NSMutableData *download= [_downloads objectForKey:opKey];
-		if (!download) {
-			download= [[NSMutableData alloc] init];
+    NSUInteger downloaded= 0;
+    @synchronized (self) {
+        
+        // Get current download for this operation
+        NSMutableData *download= _downloads[opKey];
+        if (!download) {
+            download= [[NSMutableData alloc] init];
 
-			[_downloads setObject:download forKey:opKey];
-		}
-		
-		// Append data if we haven't reached the limit
-		if ([download length] < URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES) {
-			[download appendData:data];
+            _downloads[opKey]= download;
+        }
+        
+        // Append data if we haven't reached the limit
+        if (download.length < URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES) {
+            [download appendData:data];
 
-			downloaded= [download length];
-			
-			// If we have reached the limit count the operation as finished
-			if (downloaded >= URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES) {
-				[operation cancel];
-				_count++;
-			}
-		}
-	
-		if (_failedCount + _count == URL_DISPATCHER_TEST_COUNT)
-			finished= YES;
-	}
-	
-	if (downloaded)
-		NSLog(@"Operation %p: downloaded: %lu bytes (count: %lu, failed count: %lu)", operation, (unsigned long) downloaded, (unsigned long) _count, (unsigned long) _failedCount);
+            downloaded= download.length;
+            
+            // If we have reached the limit count the operation as finished
+            if (downloaded >= URL_DISPATCHER_TEST_MAX_DOWNLOAD_BYTES) {
+                [operation cancel];
+                _count++;
+            }
+        }
+    
+        if (_failedCount + _count == URL_DISPATCHER_TEST_COUNT)
+            finished= YES;
+    }
+    
+    if (downloaded)
+        NSLog(@"Operation %p: downloaded: %lu bytes (count: %lu, failed count: %lu)", operation, (unsigned long) downloaded, (unsigned long) _count, (unsigned long) _failedCount);
 
-	if (finished) {
-		
-		// Notifiy end of downloads
-		[_semaphore lock];
-		[_semaphore signal];
-		[_semaphore unlock];
-	}
+    if (finished) {
+        
+        // Notifiy end of downloads
+        [_semaphore lock];
+        [_semaphore signal];
+        [_semaphore unlock];
+    }
 }
 
 - (void) dispatchOperation:(LSURLDispatchOperation *)operation didFailWithError:(NSError *)error {
-	NSLog(@"Operation %p: download failed with error: %@ (count: %lu, failed count: %lu)", operation, error, (unsigned long) _count, (unsigned long) _failedCount);
+    NSLog(@"Operation %p: download failed with error: %@ (count: %lu, failed count: %lu)", operation, error, (unsigned long) _count, (unsigned long) _failedCount);
 
-	BOOL finished= NO;
-	
-	@synchronized (self) {
-		_failedCount++;
-		
-		if (_failedCount + _count == URL_DISPATCHER_TEST_COUNT)
-			finished= YES;
-	}
-	
-	if (finished) {
-		
-		// Notifiy end of downloads
-		[_semaphore lock];
-		[_semaphore signal];
-		[_semaphore unlock];
-	}
+    BOOL finished= NO;
+    
+    @synchronized (self) {
+        _failedCount++;
+        
+        if (_failedCount + _count == URL_DISPATCHER_TEST_COUNT)
+            finished= YES;
+    }
+    
+    if (finished) {
+        
+        // Notifiy end of downloads
+        [_semaphore lock];
+        [_semaphore signal];
+        [_semaphore unlock];
+    }
 }
 
 - (void) dispatchOperationDidFinish:(LSURLDispatchOperation *)operation {}

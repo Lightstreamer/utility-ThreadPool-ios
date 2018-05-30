@@ -23,7 +23,7 @@
 
 
 @class LSURLDispatcherThread;
-@class LSInvocation;
+
 
 /**
  @brief LSURLDispatchOperation describes an ongoing URL request operation.

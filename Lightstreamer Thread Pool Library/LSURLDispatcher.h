@@ -53,6 +53,7 @@ typedef NS_ENUM(NSUInteger, LSLongRequestLimitExceededPolicy) {
 @class LSURLDispatchOperation;
 @protocol LSURLDispatchDelegate;
 
+
 /**
  @brief LSURLDispatcher is a singleton object providing URL request services with strict concurrency monitoring to avoid connection pool exhaustion.
  <br/> Normal system behavior, on both iOS and macOS, is that, when the connection pool for a specific end-point is exhausted, requests in excess simply timeout.
@@ -120,7 +121,7 @@ typedef NS_ENUM(NSUInteger, LSLongRequestLimitExceededPolicy) {
  @throws NSException If <code>maxLongRunningRequestsPerEndPoint</code> is greater than <code>maxRequestsPerEndPoint</code>.
  */
 - (nonnull instancetype) initWithMaxRequestsPerEndPoint:(NSUInteger)maxRequestsPerEndPoint
-                      maxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint;
+                      maxLongRunningRequestsPerEndPoint:(NSUInteger)maxLongRunningRequestsPerEndPoint NS_DESIGNATED_INITIALIZER;
 
 
 #pragma mark -

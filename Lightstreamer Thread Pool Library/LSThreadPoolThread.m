@@ -28,14 +28,14 @@
 #pragma mark LSThreadPoolThread extension
 
 @interface LSThreadPoolThread () {
-	LSThreadPool * __weak _pool;
-	NSMutableArray * __weak _queue;
-	NSCondition * __weak _queueMonitor;
-	
-	NSTimeInterval _loopInterval;
-	NSTimeInterval _lastActivity;
-	BOOL _running;
-	BOOL _working;
+    LSThreadPool * __weak _pool;
+    NSMutableArray<LSInvocation *> * __weak _queue;
+    NSCondition * __weak _queueMonitor;
+    
+    NSTimeInterval _loopInterval;
+    NSTimeInterval _lastActivity;
+    BOOL _running;
+    BOOL _working;
 }
 
 
@@ -51,37 +51,43 @@
 #pragma mark -
 #pragma mark Initialization
 
-- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor {
-	if ((self = [super init])) {
-		
-		// Initialization
-		_pool= pool;
-		_queue= queue;
-		_queueMonitor= queueMonitor;
+- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray<LSInvocation *> *)queue queueMonitor:(NSCondition *)queueMonitor {
+    if ((self = [super init])) {
+        
+        // Initialization
+        _pool= pool;
+        _queue= queue;
+        _queueMonitor= queueMonitor;
         
         self.name= name;
-		
-		// Use a random loop time to avoid periodic delays
-		int random= 0;
-		int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
+        
+        // Use a random loop time to avoid periodic delays
+        int random= 0;
+        int result= SecRandomCopyBytes(kSecRandomDefault, sizeof(random), (uint8_t *) &random);
         if (result == 0)
             _loopInterval= 0.5 + ((double) (ABS(random) % 1000)) / 1000.0;
         else
             _loopInterval= 1.3;
-		
-		_running= YES;
-		_working= YES;
-	}
-	
-	return self;
+        
+        _running= YES;
+        _working= YES;
+    }
+    
+    return self;
+}
+
+- (instancetype) init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:@"Default initializer must not be used with LSThreadPoolThread"
+                                 userInfo:nil];
 }
 
 - (void) dealloc {
-	[self dispose];
+    [self dispose];
 }
 
 - (void) dispose {
-	_running= NO;
+    _running= NO;
 }
 
 
@@ -90,10 +96,10 @@
 
 - (void) main {
     @autoreleasepool {
-	
+    
         // Local retain: they could be released while the thread is running
         NSString *name= self.name;
-        NSMutableArray *queue= _queue;
+        NSMutableArray<LSInvocation *> *queue= _queue;
         NSCondition *monitor= _queueMonitor;
         
         @try {
@@ -103,7 +109,7 @@
                     @try {
                         [monitor lock];
                         
-                        if ([queue count] == 0) {
+                        if (queue.count == 0) {
                             _working= NO;
 
                             [monitor waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:_loopInterval]];
@@ -111,8 +117,8 @@
                             _working= YES;
                         }
                         
-                        if ([queue count] > 0) {
-                            invocation= [queue objectAtIndex:0];
+                        if (queue.count > 0) {
+                            invocation= queue[0];
                             
                             [queue removeObjectAtIndex:0];
                         }
@@ -142,15 +148,15 @@
                                 }
                                 
                             } @catch (NSException *ee) {
-								[LSLog sourceType:LOG_SRC_THREAD_POOL source:_pool log:@"exception caught while performing invocation on thread pool %@: %@ (user info: %@)", name, ee, ee.userInfo];
+                                [LSLog sourceType:LOG_SRC_THREAD_POOL source:_pool log:@"exception caught while performing invocation on thread pool %@: %@ (user info: %@)", name, ee, ee.userInfo];
                             }
                             
-                            _lastActivity= [[NSDate date] timeIntervalSinceReferenceDate];
+                            _lastActivity= [NSDate date].timeIntervalSinceReferenceDate;
                         }
                         
                     } @catch (NSException *e) {
-						[LSLog sourceType:LOG_SRC_THREAD_POOL source:_pool log:@"exception caught while running thread pool %@: %@ (user info: %@)", name, e, e.userInfo];
-						
+                        [LSLog sourceType:LOG_SRC_THREAD_POOL source:_pool log:@"exception caught while running thread pool %@: %@ (user info: %@)", name, e, e.userInfo];
+                        
                     } @finally {
                         invocation= nil;
                     }

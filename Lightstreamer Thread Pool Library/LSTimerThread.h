@@ -57,7 +57,13 @@
  @return The created timer thread.
  @throws NSException If the name is <code>nil</code>.
  */
-- (nonnull instancetype) initWithName:(nonnull NSString *)name;
+- (nonnull instancetype) initWithName:(nonnull NSString *)name NS_DESIGNATED_INITIALIZER;
+
+/**
+ @brief Invalid initializer, use <code>initWithName:</code>.
+ @throws NSException Always.
+ */
+- (nonnull instancetype) init NS_UNAVAILABLE;
 
 
 #pragma mark -

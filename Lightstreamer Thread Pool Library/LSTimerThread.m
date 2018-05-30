@@ -29,8 +29,8 @@
 #pragma mark LSTimerThread extension
 
 @interface LSTimerThread () {
-	NSThread *_thread;
-	BOOL _running;
+    NSThread *_thread;
+    BOOL _running;
 }
 
 
@@ -71,28 +71,28 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark Singleton management
 
 + (LSTimerThread *) sharedTimer {
-	if (__sharedTimer)
-		return __sharedTimer;
-	
-	@synchronized ([LSTimerThread class]) {
-		if (!__sharedTimer)
-			__sharedTimer= [[LSTimerThread alloc] initWithName:@"LSSharedTimerThread"];
-	}
-	
-	return __sharedTimer;
+    if (__sharedTimer)
+        return __sharedTimer;
+    
+    @synchronized ([LSTimerThread class]) {
+        if (!__sharedTimer)
+            __sharedTimer= [[LSTimerThread alloc] initWithName:@"LSSharedTimerThread"];
+    }
+    
+    return __sharedTimer;
 }
 
 + (void) dispose {
-	if (!__sharedTimer)
-		return;
-	
-	@synchronized ([LSTimerThread class]) {
-		if (__sharedTimer) {
-			[__sharedTimer stopThread];
-			
-			__sharedTimer= nil;
-		}
-	}
+    if (!__sharedTimer)
+        return;
+    
+    @synchronized ([LSTimerThread class]) {
+        if (__sharedTimer) {
+            [__sharedTimer stopThread];
+            
+            __sharedTimer= nil;
+        }
+    }
 }
 
 
@@ -100,23 +100,29 @@ static LSTimerThread *__sharedTimer= nil;
 #pragma mark Initialization
 
 - (instancetype) initWithName:(nonnull NSString *)name {
-	if ((self = [super init])) {
-		
-		// Initialization
+    if ((self = [super init])) {
+        
+        // Initialization
         if (!name)
             @throw [NSException exceptionWithName:NSInvalidArgumentException
                                            reason:@"Timer thread name can't be nil"
                                          userInfo:nil];
 
         _running= YES;
-		
-		_thread= [[NSThread alloc] initWithTarget:self selector:@selector(threadRunLoop) object:nil];
-		_thread.name= name;
-		
-		[_thread start];
-	}
-	
-	return self;
+        
+        _thread= [[NSThread alloc] initWithTarget:self selector:@selector(threadRunLoop) object:nil];
+        _thread.name= name;
+        
+        [_thread start];
+    }
+    
+    return self;
+}
+
+- (instancetype) init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:@"Default initializer must not be used with LSTimerThread"
+                                 userInfo:nil];
 }
 
 
@@ -130,33 +136,33 @@ static LSTimerThread *__sharedTimer= nil;
 }
 
 - (void) performSelector:(SEL)selector onTarget:(id)target withObject:(id)argument afterDelay:(NSTimeInterval)delay {
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:argument delay:delay];
-	
-	[self performSelector:@selector(threadPerformDelayedInvocation:) onThread:_thread withObject:invocation waitUntilDone:NO];
+    LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:argument delay:delay];
+    
+    [self performSelector:@selector(threadPerformDelayedInvocation:) onThread:_thread withObject:invocation waitUntilDone:NO];
 }
 
 - (void) performSelector:(SEL)selector onTarget:(id)target afterDelay:(NSTimeInterval)delay {
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector delay:delay];
-	
-	[self performSelector:@selector(threadPerformDelayedInvocation:) onThread:_thread withObject:invocation waitUntilDone:NO];
+    LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector delay:delay];
+    
+    [self performSelector:@selector(threadPerformDelayedInvocation:) onThread:_thread withObject:invocation waitUntilDone:NO];
 }
 
 - (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector object:(id)argument {
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:argument];
-	
-	[self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
+    LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector argument:argument];
+    
+    [self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
 }
 
 - (void) cancelPreviousPerformRequestsWithTarget:(id)target selector:(SEL)selector {
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector];
-	
-	[self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
+    LSInvocation *invocation= [LSInvocation invocationWithTarget:target selector:selector];
+    
+    [self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
 }
 
 - (void) cancelPreviousPerformRequestsWithTarget:(id)target {
-	LSInvocation *invocation= [LSInvocation invocationWithTarget:target];
-	
-	[self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
+    LSInvocation *invocation= [LSInvocation invocationWithTarget:target];
+    
+    [self performSelector:@selector(threadCancelPreviousDelayedPerformWithInfo:) onThread:_thread withObject:invocation waitUntilDone:NO];
 }
 
 
@@ -171,12 +177,12 @@ static LSTimerThread *__sharedTimer= nil;
 }
 
 - (void) threadCancelPreviousDelayedPerformWithInfo:(LSInvocation *)invocation {
-	if (invocation.selector) {
-		[NSObject cancelPreviousPerformRequestsWithTarget:invocation.target selector:invocation.selector object:invocation.argument];
-		
-	} else {
-		[NSObject cancelPreviousPerformRequestsWithTarget:invocation.target];
-	}
+    if (invocation.selector) {
+        [NSObject cancelPreviousPerformRequestsWithTarget:invocation.target selector:invocation.selector object:invocation.argument];
+        
+    } else {
+        [NSObject cancelPreviousPerformRequestsWithTarget:invocation.target];
+    }
 }
 
 - (void) threadPerformBlockInvocation:(LSInvocation *)invocation {
@@ -191,8 +197,8 @@ static LSTimerThread *__sharedTimer= nil;
     @autoreleasepool {
         NSRunLoop *loop= [NSRunLoop currentRunLoop];
         
-		[LSLog sourceType:LOG_SRC_TIMER source:self log:@"thread started"];
-		
+        [LSLog sourceType:LOG_SRC_TIMER source:self log:@"thread started"];
+        
         do {
             @autoreleasepool {
                 NSTimer *timer= [NSTimer timerWithTimeInterval:5.3 target:self selector:@selector(threadHeartBeat) userInfo:nil repeats:NO];
@@ -209,25 +215,25 @@ static LSTimerThread *__sharedTimer= nil;
                     [timer invalidate];
                     
                 } @catch (NSException *e) {
-					[LSLog sourceType:LOG_SRC_TIMER source:self log:@"exception caught while running thread: %@ (user info: %@)", e, e.userInfo];
+                    [LSLog sourceType:LOG_SRC_TIMER source:self log:@"exception caught while running thread: %@ (user info: %@)", e, e.userInfo];
                 }
             }
             
         } while (_running);
         
-		[LSLog sourceType:LOG_SRC_TIMER source:self log:@"thread stopped"];
+        [LSLog sourceType:LOG_SRC_TIMER source:self log:@"thread stopped"];
     }
 }
 
 - (void) threadHeartBeat {
-	
-	// Dummy method to keep the run loop busy
+    
+    // Dummy method to keep the run loop busy
 }
 
 - (void) stopThread {
-	_running= NO;
-	
-	_thread= nil;
+    _running= NO;
+    
+    _thread= nil;
 }
 
 

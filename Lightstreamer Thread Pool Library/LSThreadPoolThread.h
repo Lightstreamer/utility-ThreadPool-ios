@@ -22,6 +22,8 @@
 
 
 @class LSThreadPool;
+@class LSInvocation;
+
 
 /**
  @brief A thread of an LSThreadPool. <b>This class should not be used directly</b>.
@@ -33,7 +35,9 @@
 #pragma mark -
 #pragma mark Initialization (for internal use only)
 
-- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray *)queue queueMonitor:(NSCondition *)queueMonitor;
+- (instancetype) initWithPool:(LSThreadPool *)pool name:(NSString *)name queue:(NSMutableArray<LSInvocation *> *)queue queueMonitor:(NSCondition *)queueMonitor NS_DESIGNATED_INITIALIZER;
+
+- (instancetype) init NS_UNAVAILABLE;
 
 - (void) dispose;
 

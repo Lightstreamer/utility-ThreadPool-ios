@@ -51,7 +51,13 @@
  hence in any moment there may be up to <code>poolSize</code> threads.
  @throws NSException If the name is <code>nil</code> or the pool size is 0.
  */
-- (nonnull instancetype) initWithName:(nonnull NSString *)name size:(NSUInteger)poolSize;
+- (nonnull instancetype) initWithName:(nonnull NSString *)name size:(NSUInteger)poolSize NS_DESIGNATED_INITIALIZER;
+
+/**
+ @brief Invalid initializer, use <code>initWithName:size:</code>.
+ @throws NSException Always.
+ */
+- (nonnull instancetype) init NS_UNAVAILABLE;
 
 /**
  @brief Disposes of any active thread and makes the thread pool no more usable.

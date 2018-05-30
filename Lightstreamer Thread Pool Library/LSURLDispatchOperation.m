@@ -22,9 +22,6 @@
 #import "LSURLDispatchOperation+Internals.h"
 #import "LSURLDispatcher.h"
 #import "LSURLDispatcher+Internals.h"
-#import "LSThreadPool.h"
-#import "LSInvocation.h"
-#import "LSTimerThread.h"
 #import "LSLog.h"
 #import "LSLog+Internals.h"
 
@@ -40,19 +37,22 @@
 @interface LSURLDispatchOperation () {
     LSURLDispatcher * __weak _dispatcher;
     
-	NSURLRequest *_request;
-	NSString *_endPoint;
-	id <LSURLDispatchDelegate> _delegate;
-	BOOL _gathedData;
-	BOOL _isLong;
-	
-	NSCondition *_waitForCompletion;
+    NSURLRequest *_request;
+    NSString *_endPoint;
+    id <LSURLDispatchDelegate> _delegate;
+    BOOL _gathedData;
+    BOOL _isLong;
     
-    LSThreadPool *_notificationThreadPool;
-	
-	NSURLResponse *_response;
-	NSError *_error;
-	NSMutableData *_data;
+    NSCondition *_waitForCompletion;
+    
+    dispatch_queue_t _notificationQueue;
+
+    dispatch_queue_t _timeoutQueue;
+    dispatch_block_t _timeoutBlock;
+    
+    NSURLResponse *_response;
+    NSError *_error;
+    NSMutableData *_data;
     
     NSURLSession * __weak _session;
     NSURLSessionDataTask *_task;
@@ -78,25 +78,28 @@
 #pragma mark Initialization
 
 - (instancetype) initWithDispatcher:(LSURLDispatcher *)dispatcher session:(NSURLSession *)session request:(NSURLRequest *)request endPoint:(NSString *)endPoint delegate:(id <LSURLDispatchDelegate>)delegate gatherData:(BOOL)gatherData isLong:(BOOL)isLong {
-	if ((self = [super init])) {
-		
-		// Initialization
-        _dispatcher = dispatcher;
+    if ((self = [super init])) {
+        
+        // Initialization
+        _dispatcher= dispatcher;
         
         _session= session;
-		_request= request;
-		_endPoint= endPoint;
-		_delegate= delegate;
-		_gathedData= gatherData;
-		_isLong= isLong;
-		
-		_waitForCompletion= [[NSCondition alloc] init];
+        _request= request;
+        _endPoint= endPoint;
+        _delegate= delegate;
+        _gathedData= gatherData;
+        _isLong= isLong;
         
-        NSString *poolName= [NSString stringWithFormat:@"LSURLDispatchOperation Notification %@", endPoint];
-        _notificationThreadPool= [[LSThreadPool alloc] initWithName:poolName size:1];
-	}
-	
-	return self;
+        _waitForCompletion= [[NSCondition alloc] init];
+        
+        NSString *queueName= [NSString stringWithFormat:@"LSURLDispatchOperation Notification Queue for %@", endPoint];
+        _notificationQueue= dispatch_queue_create([queueName cStringUsingEncoding:NSUTF8StringEncoding], DISPATCH_QUEUE_SERIAL);
+        
+        queueName= [NSString stringWithFormat:@"LSURLDispatchOperation Timeout Queue for %@", endPoint];
+        _timeoutQueue= dispatch_queue_create([queueName cStringUsingEncoding:NSUTF8StringEncoding], DISPATCH_QUEUE_SERIAL);
+    }
+    
+    return self;
 }
 
 
@@ -104,21 +107,25 @@
 #pragma mark Execution
 
 - (void) start {
-	if (_gathedData)
-		_data= [[NSMutableData alloc] init];
+    if (_gathedData)
+        _data= [[NSMutableData alloc] init];
     
     // Prepare a copy of the request
     NSMutableURLRequest *request= [_request mutableCopy];
     
     // Check timeout
-	NSTimeInterval timeout= [_request timeoutInterval];
+    NSTimeInterval timeout= _request.timeoutInterval;
     if (timeout > 0.0) {
         
         // Start the local timeout timer and clear the timeout for
         // the operating system (can't be trusted)
-		[[LSTimerThread sharedTimer] performSelector:@selector(timeout) onTarget:self afterDelay:timeout];
+        _timeoutBlock= dispatch_block_create(0, ^{
+            [self timeout];
+        });
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)), _timeoutQueue, _timeoutBlock);
 
-        [request setTimeoutInterval:0.0];
+        request.timeoutInterval= 0.0;
     }
 
     [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"starting task of operation %p for end-point: %@", self, _endPoint];
@@ -139,17 +146,17 @@
         [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ failed due to nil task returned by session", self, _endPoint];
         
         // Cancel the timeout timer
-        [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(timeout)];
+        dispatch_block_cancel(_timeoutBlock);
         
         // Schedule call to delegate
-        [_notificationThreadPool scheduleInvocationForBlock:^{
+        dispatch_async(_notificationQueue, ^{
             @try {
-                [_delegate dispatchOperation:self didFailWithError:error];
+                [self->_delegate dispatchOperation:self didFailWithError:error];
                 
             } @catch (NSException *e) {
-                [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+                [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
             }
-        }];
+        });
         
     } else {
         
@@ -162,20 +169,20 @@
 }
 
 - (void) startAndWaitForCompletion {
-	
-	// Acquire the completion lock
-	[_waitForCompletion lock];
+    
+    // Acquire the completion lock
+    [_waitForCompletion lock];
 
-	// Start the connection
-	[self start];
-	
+    // Start the connection
+    [self start];
+    
     if (_task) {
         
         // Wait for a signal
         [_waitForCompletion wait];
     }
     
-	[_waitForCompletion unlock];
+    [_waitForCompletion unlock];
 }
 
 - (void) fail {
@@ -192,14 +199,14 @@
     [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ failed due to no connection available", self, _endPoint];
     
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperation:self didFailWithError:error];
+            [self->_delegate dispatchOperation:self didFailWithError:error];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
 }
 
 - (void) cancel {
@@ -222,17 +229,17 @@
     [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"task of operation %p for end-point: %@ cancelled", self, _endPoint];
     
     // Cancel the timeout timer
-    [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(timeout)];
-    
+    dispatch_block_cancel(_timeoutBlock);
+
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperationDidFinish:self];
+            [self->_delegate dispatchOperationDidFinish:self];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying finish to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying finish to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
     
     // Notify waiting threads
     [_waitForCompletion lock];
@@ -265,7 +272,7 @@
     // Compose the error
     NSError *error= [[NSError alloc] initWithDomain:NSURLErrorDomain
                                                code:NSURLErrorTimedOut
-                                           userInfo:@{NSURLErrorFailingURLStringErrorKey: [_request.URL description],
+                                           userInfo:@{NSURLErrorFailingURLStringErrorKey: _request.URL.description,
                                                       NSLocalizedDescriptionKey: @"The request timed out.",
                                                       NSUnderlyingErrorKey: [NSError errorWithDomain:ERROR_DOMAIN
                                                                                                 code:NSURLErrorTimedOut
@@ -275,14 +282,14 @@
     _error= error;
     
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperation:self didFailWithError:error];
+            [self->_delegate dispatchOperation:self didFailWithError:error];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
     
     // Notify waiting threads
     [_waitForCompletion lock];
@@ -330,22 +337,22 @@
     _response= response;
     
     // Truncate current data buffer
-    [_data setLength:0];
+    _data.length= 0;
     
     // Cancel the timeout timer at the response only for long operations,
     // other operations will cancel it at finish or failure
     if (_isLong)
-        [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(timeout)];
+        dispatch_block_cancel(_timeoutBlock);
     
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperation:self didReceiveResponse:response];
+            [self->_delegate dispatchOperation:self didReceiveResponse:response];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying response to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying response to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
 }
 
 - (void) taskDidReceiveData:(NSData *)data {
@@ -359,14 +366,14 @@
     [_data appendData:data];
     
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperation:self didReceiveData:data];
+            [self->_delegate dispatchOperation:self didReceiveData:data];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying data to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying data to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
 }
 
 - (void) taskDidFailWithError:(NSError *)error {
@@ -389,17 +396,17 @@
     [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ failed with error: %@", self, _endPoint, error];
     
     // Cancel the timeout timer
-    [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(timeout)];
+    dispatch_block_cancel(_timeoutBlock);
     
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperation:self didFailWithError:error];
+            [self->_delegate dispatchOperation:self didFailWithError:error];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying error to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
     
     // Notify waiting threads
     [_waitForCompletion lock];
@@ -427,17 +434,17 @@
     [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ finished loading", self, _endPoint];
     
     // Cancel the timeout timer
-    [[LSTimerThread sharedTimer] cancelPreviousPerformRequestsWithTarget:self selector:@selector(timeout)];
-    
+    dispatch_block_cancel(_timeoutBlock);
+
     // Schedule call to delegate
-    [_notificationThreadPool scheduleInvocationForBlock:^{
+    dispatch_async(_notificationQueue, ^{
         @try {
-            [_delegate dispatchOperationDidFinish:self];
+            [self->_delegate dispatchOperationDidFinish:self];
             
         } @catch (NSException *e) {
-            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying finish to delegate: %@, reason: '%@'\nCall stack:%@", self, _endPoint, e.name, e.reason, e.callStackSymbols];
+            [LSLog sourceType:LOG_SRC_URL_DISPATCHER source:self->_dispatcher log:@"connection of operation %p for end-point: %@ caught exception while notifying finish to delegate: %@, reason: '%@'\nCall stack:%@", self, self->_endPoint, e.name, e.reason, e.callStackSymbols];
         }
-    }];
+    });
     
     // Notify waiting threads
     [_waitForCompletion lock];
