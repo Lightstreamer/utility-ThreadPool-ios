@@ -119,10 +119,11 @@
         
         // Start the local timeout timer and clear the timeout for
         // the operating system (can't be trusted)
+        __weak LSURLDispatchOperation *weakSelf= self;
         _timeoutBlock= dispatch_block_create(0, ^{
-            [self timeout];
+            [weakSelf timeout];
         });
-        
+
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)), _timeoutQueue, _timeoutBlock);
 
         request.timeoutInterval= 0.0;
